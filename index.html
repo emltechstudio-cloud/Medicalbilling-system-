@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Billing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-bar {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #495057;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .record-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .record-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+        .stop-btn {
+            background: linear-gradient(135deg, #ff4757, #c44569);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input, .input-group textarea, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .textarea-large {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .recording-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .processing-message {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .error-message {
+            background: #ffe7e7;
+            color: #cc0000;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            background: #e7ffe7;
+            color: #006600;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 AI Medical Billing</h1>
+            <p>Streamlined Medical Recording & Billing System</p>
+        </div>
+
+        <div class="nav-bar">
+            <button class="nav-btn" onclick="showSection('home')">🎙️ Record</button>
+            <button class="nav-btn" onclick="showSection('recordings')">📋 Recordings</button>
+        </div>
+
+        <div class="main-content">
+            <!-- Home Section -->
+            <div id="home" class="section active">
+                <div class="record-section">
+                    <h2>Start New Recording</h2>
+                    <button id="recordBtn" class="record-btn" onclick="startRecording()">
+                        🎙️ Start Recording
+                    </button>
+                    <button id="stopBtn" class="record-btn stop-btn hidden" onclick="stopRecording()">
+                        ⏹️ Stop Recording
+                    </button>
+                    <div id="recordingStatus" class="hidden" style="margin-top: 20px; color: red; font-weight: bold;">
+                        🔴 Recording in progress...
+                    </div>
+                </div>
+
+                <!-- Text Processing Section -->
+                <div id="textProcessing" class="hidden">
+                    <div class="input-group">
+                        <label for="transcriptText">Transcript (Edit as needed)</label>
+                        <textarea id="transcriptText" class="textarea-large" placeholder="Transcript will appear here..."></textarea>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn-primary" onclick="generateClaim()">🤖 Generate Medical Claim</button>
+                        <button class="btn-secondary" onclick="saveRecording()">💾 Save Recording</button>
+                    </div>
+                </div>
+
+                <!-- Claim Review Section -->
+                <div id="claimReview" class="hidden">
+                    <h3>Generated Medical Claim</h3>
+                    <div class="input-group">
+                        <textarea id="generatedClaim" class="textarea-large" readonly></textarea>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn-primary" onclick="shareClaim()">📧 Share via Email</button>
+                        <button class="btn-primary" onclick="saveClaim()">💾 Save Claim</button>
+                        <button class="btn-secondary" onclick="startNewRecording()">🎙️ New Recording</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recordings Section -->
+            <div id="recordings" class="section">
+                <h2>📋 Saved Recordings</h2>
+                <div id="recordingsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Modal -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h3>Patient Information</h3>
+            <div class="input-group">
+                <label>Patient Name *</label>
+                <input type="text" id="patientName" required>
+            </div>
+            <div class="input-group">
+                <label>Age *</label>
+                <input type="number" id="patientAge" min="0" max="120" required>
+            </div>
+            <div class="input-group">
+                <label>Sex *</label>
+                <select id="patientSex" required>
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Insurance Provider *</label>
+                <input type="text" id="insuranceProvider" required>
+            </div>
+            <div class="input-group">
+                <label>Policy Number *</label>
+                <input type="text" id="policyNumber" required>
+            </div>
+            <div class="input-group">
+                <label>Medical History (Optional)</label>
+                <textarea id="medicalHistory" rows="3"></textarea>
+            </div>
+            <div style="text-align: center;">
+                <button class="btn-primary" onclick="confirmPatientInfo()">Start Recording</button>
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let currentRecordingBlob = null;
+        let recordings = JSON.parse(localStorage.getItem('medicalRecordings')) || [];
+        
+        // Patient metadata
+        let patientMetadata = {
+            patient_name: '',
+            age: 0,
+            sex: '',
+            insurance_provider: '',
+            policy_number: '',
+            medical_history: ''
+        };
+
+        // Your backend URL
+        const API_BASE = "https://emmanuel154-medical-billing-system24-7.hf.space";
+
+        // Show sections
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName).classList.add('active');
+            
+            if (sectionName === 'recordings') {
+                loadRecordings();
+            }
+        }
+
+        // Start recording
+        function startRecording() {
+            console.log('Start recording clicked');
+            
+            // Reset form
+            document.getElementById('patientName').value = '';
+            document.getElementById('patientAge').value = '';
+            document.getElementById('patientSex').value = '';
+            document.getElementById('insuranceProvider').value = '';
+            document.getElementById('policyNumber').value = '';
+            document.getElementById('medicalHistory').value = '';
+            
+            // Show modal
+            document.getElementById('patientModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('patientModal').style.display = 'none';
+        }
+
+        // Confirm patient info and start recording
+        async function confirmPatientInfo() {
+            console.log('Confirming patient info...');
+            
+            // Get values
+            const name = document.getElementById('patientName').value.trim();
+            const age = document.getElementById('patientAge').value;
+            const sex = document.getElementById('patientSex').value;
+            const insurance = document.getElementById('insuranceProvider').value.trim();
+            const policy = document.getElementById('policyNumber').value.trim();
+            const history = document.getElementById('medicalHistory').value.trim();
+
+            // Validate required fields
+            if (!name || !age || !sex || !insurance || !policy) {
+                alert('Please fill in all required fields (marked with *)');
+                return;
+            }
+
+            // Store patient metadata
+            patientMetadata = {
+                patient_name: name,
+                age: parseInt(age),
+                sex: sex,
+                insurance_provider: insurance,
+                policy_number: policy,
+                medical_history: history
+            };
+
+            console.log('Patient metadata:', patientMetadata);
+            closeModal();
+
+            try {
+                console.log('Requesting microphone...');
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone granted');
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    console.log('Recording stopped');
+                    currentRecordingBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    stream.getTracks().forEach(track => track.stop());
+                    processRecording();
+                };
+
+                mediaRecorder.start();
+                console.log('Recording started');
+
+                // Update UI
+                document.getElementById('recordBtn').classList.add('hidden');
+                document.getElementById('stopBtn').classList.remove('hidden');
+                document.getElementById('recordingStatus').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Microphone error:', error);
+                alert('❌ Microphone permission denied or not available. Please allow microphone access and try again.');
+            }
+        }
+
+        // Stop recording
+        function stopRecording() {
+            console.log('Stop recording clicked');
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+
+            // Update UI
+            document.getElementById('recordBtn').classList.remove('hidden');
+            document.getElementById('stopBtn').classList.add('hidden');
+            document.getElementById('recordingStatus').classList.add('hidden');
+        }
+
+        // Process recording
+        async function processRecording() {
+            console.log('Processing recording...');
+            
+            // Show processing section
+            document.getElementById('textProcessing').classList.remove('hidden');
+            document.getElementById('transcriptText').value = 'Processing audio with Whisper AI... Please wait.';
+
+            try {
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', currentRecordingBlob, 'recording.wav');
+                formData.append('metadata_json', JSON.stringify(patientMetadata));
+
+                console.log('Sending to backend:', API_BASE + '/submit_audio_chunk');
+                console.log('Metadata:', patientMetadata);
+
+                const response = await fetch(API_BASE + '/submit_audio_chunk', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    document.getElementById('transcriptText').value = data.transcribed_text || 'No transcription received';
+                    
+                    // Show success message
+                    showMessage('✅ Audio transcribed successfully!', 'success');
+                } else {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+            } catch (error) {
+                console.error('Processing error:', error);
+                document.getElementById('transcriptText').value = 'Error processing audio. Please try again.';
+                showMessage('❌ Error processing audio: ' + error.message, 'error');
+            }
+        }
+
+        // Generate claim
+        async function generateClaim() {
+            console.log('Generating claim...');
+            
+            const transcript = document.getElementById('transcriptText').value;
+            if (!transcript || transcript.includes('Processing') || transcript.includes('Error')) {
+                alert('Please wait for audio processing to complete or enter text manually');
+                return;
+            }
+
+            // Show claim section
+            document.getElementById('claimReview').classList.remove('hidden');
+            document.getElementById('generatedClaim').value = 'Generating medical claim with T5 AI... Please wait.';
+
+            try {
+                const requestData = {
+                    metadata: patientMetadata,
+                    text: transcript
+                };
+
+                console.log('Sending to backend:', API_BASE + '/submit_text');
+                console.log('Request data:', requestData);
+
+                const response = await fetch(API_BASE + '/submit_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('Response status:', response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    document.getElementById('generatedClaim').value = data.claim_text || 'No claim received';
+                    showMessage('✅ Medical claim generated successfully!', 'success');
+                } else {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+            } catch (error) {
+                console.error('Claim generation error:', error);
+                document.getElementById('generatedClaim').value = 'Error generating claim. Please try again.';
+                showMessage('❌ Error generating claim: ' + error.message, 'error');
+            }
+        }
+
+        // Save recording
+        function saveRecording() {
+            const transcript = document.getElementById('transcriptText').value;
+            if (!transcript || transcript.includes('Processing') || transcript.includes('Error')) {
+                alert('No valid transcript to save');
+                return;
+            }
+
+            const recording = {
+                id: Date.now(),
+                patientName: patientMetadata.patient_name,
+                patientMetadata: patientMetadata,
+                date: new Date().toISOString(),
+                transcript: transcript,
+                claim: null,
+                status: 'recorded'
+            };
+
+            recordings.unshift(recording);
+            localStorage.setItem('medicalRecordings', JSON.stringify(recordings));
+            
+            alert(`✅ Recording saved for ${patientMetadata.patient_name}`);
+        }
+
+        // Save claim
+        function saveClaim() {
+            const claim = document.getElementById('generatedClaim').value;
+            if (!claim || claim.includes('Generating') || claim.includes('Error')) {
+                alert('No valid claim to save');
+                return;
+            }
+
+            // Find and update recording
+            let recording = recordings.find(r => r.patientName === patientMetadata.patient_name && !r.claim);
+            
+            if (!recording) {
+                recording = {
+                    id: Date.now(),
+                    patientName: patientMetadata.patient_name,
+                    patientMetadata: patientMetadata,
+                    date: new Date().toISOString(),
+                    transcript: document.getElementById('transcriptText').value,
+                    claim: null,
+                    status: 'recorded'
+                };
+                recordings.unshift(recording);
+            }
+
+            recording.claim = claim;
+            recording.status = 'completed';
+            localStorage.setItem('medicalRecordings', JSON.stringify(recordings));
+            
+            alert(`✅ Claim saved for ${patientMetadata.patient_name}`);
+        }
+
+        // Share claim
+        function shareClaim() {
+            const claim = document.getElementById('generatedClaim').value;
+            if (!claim || claim.includes('Generating') || claim.includes('Error')) {
+                alert('No valid claim to share');
+                return;
+            }
+
+            const subject = `Medical Claim - ${patientMetadata.patient_name}`;
+            const body = encodeURIComponent(claim);
+            window.open(`mailto:?subject=${subject}&body=${body}`);
+        }
+
+        // Start new recording
+        function startNewRecording() {
+            // Reset everything
+            document.getElementById('textProcessing').classList.add('hidden');
+            document.getElementById('claimReview').classList.add('hidden');
+            document.getElementById('transcriptText').value = '';
+            document.getElementById('generatedClaim').value = '';
+            
+            patientMetadata = {
+                patient_name: '',
+                age: 0,
+                sex: '',
+                insurance_provider: '',
+                policy_number: '',
+                medical_history: ''
+            };
+            
+            currentRecordingBlob = null;
+            document.querySelectorAll('.processing-message, .error-message, .success-message').forEach(el => el.remove());
+        }
+
+        // Load recordings
+        function loadRecordings() {
+            const recordingsList = document.getElementById('recordingsList');
+            recordingsList.innerHTML = '';
+
+            if (recordings.length === 0) {
+                recordingsList.innerHTML = '<div class="recording-item"><p>No recordings found.</p></div>';
+                return;
+            }
+
+            recordings.forEach(recording => {
+                const metadata = recording.patientMetadata || {};
+                const recordingElement = document.createElement('div');
+                recordingElement.className = 'recording-item';
+                recordingElement.innerHTML = `
+                    <h3>👤 ${recording.patientName}</h3>
+                    <p><strong>Date:</strong> ${new Date(recording.date).toLocaleDateString()}</p>
+                    <p><strong>Age/Sex:</strong> ${metadata.age || 'N/A'}, ${metadata.sex || 'N/A'}</p>
+                    <p><strong>Insurance:</strong> ${metadata.insurance_provider || 'N/A'}</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${recording.status}">${recording.status === 'completed' ? '✅ Completed' : '⏳ Recorded Only'}</span></p>
+                    <div style="margin-top: 15px;">
+                        ${recording.claim ? 
+                            `<button class="btn-primary" onclick="viewClaim(${recording.id})">View Claim</button>` : 
+                            '<button class="btn-secondary">No Claim</button>'
+                        }
+                        <button class="btn-secondary" onclick="deleteRecording(${recording.id})">Delete</button>
+                    </div>
+                `;
+                recordingsList.appendChild(recordingElement);
+            });
+        }
+
+        // View claim
+        function viewClaim(recordingId) {
+            const recording = recordings.find(r => r.id === recordingId);
+            if (recording && recording.claim) {
+                alert(recording.claim);
+            }
+        }
+
+        // Delete recording
+        function deleteRecording(recordingId) {
+            if (confirm('Are you sure you want to delete this recording?')) {
+                recordings = recordings.filter(r => r.id !== recordingId);
+                localStorage.setItem('medicalRecordings', JSON.stringify(recordings));
+                loadRecordings();
+            }
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type + '-message';
+            messageDiv.innerHTML = text;
+            
+            const container = document.querySelector('.main-content');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('App initialized');
+            console.log('Backend URL:', API_BASE);
+        });
+
+        // Close modal on outside click
+        document.getElementById('patientModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
