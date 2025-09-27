@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Medical Billing System</title>
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+  
   <style>
     * {
       margin: 0;
@@ -25,13 +31,11 @@
       min-height: 100vh;
     }
 
-    /* Enhanced Header */
     .header {
       text-align: center;
       color: white;
       margin-bottom: 30px;
       padding: 30px 0;
-      position: relative;
     }
 
     .header h1 {
@@ -41,1939 +45,338 @@
       text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    .header p {
-      opacity: 0.9;
-      font-size: 16px;
-      font-weight: 300;
-    }
-
-    /* Enhanced Navigation */
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .back-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .back-btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateX(-2px);
-    }
-
-    .nav-stats {
-      position: relative;
-    }
-
-    .stats-btn {
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .stats-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-
-    .stats-dropdown {
-      position: absolute;
-      top: 100%;
-      right: 0;
+    /* Auth Section */
+    .auth-section {
       background: white;
-      border-radius: 15px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
       padding: 20px;
-      min-width: 280px;
-      z-index: 1000;
-      margin-top: 10px;
-      display: none;
-    }
-
-    .stats-dropdown.show {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .stats-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .stats-item:last-child {
-      border-bottom: none;
-    }
-
-    .stats-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #666;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .stats-value {
-      font-size: 18px;
-      font-weight: 700;
-      color: #667eea;
-    }
-
-    /* Enhanced Screens */
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Enhanced Cards */
-    .card {
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
-    }
-
-    /* Enhanced Option Cards */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 25px;
-      margin-bottom: 30px;
-    }
-
-    .option-card {
-      background: white;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid transparent;
+      border-radius: 10px;
+      margin-bottom: 20px;
       text-align: center;
     }
 
-    .option-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-      border-color: #667eea;
-    }
-
-    .option-card .icon {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .option-card h3 {
-      font-size: 22px;
-      margin-bottom: 15px;
-      color: #333;
-    }
-
-    .option-card p {
-      font-size: 15px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    /* Enhanced Forms */
-    .form-group {
-      margin-bottom: 25px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: #333;
-      font-size: 16px;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 15px 18px;
-      border: 2px solid #e1e5e9;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      background: #f8f9fa;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
-      background: white;
-    }
-
-    textarea.form-control {
-      resize: vertical;
-      min-height: 150px;
-      line-height: 1.6;
-    }
-
-    /* Enhanced Buttons */
-    .btn {
-      padding: 16px 24px;
+    .auth-buttons button {
+      background: #4CAF50;
+      color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: 600;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
     }
 
-    .btn-block {
-      width: 100%;
+    /* Medical Form */
+    .medical-form {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
 
-    .btn-primary {
-      background: #667eea;
-      color: white;
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    .btn-primary:hover {
-      background: #5a6fd8;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-success {
-      background: #28a745;
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #218838;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
-    }
-
-    .btn-warning {
-      background: #ffc107;
-      color: #212529;
-    }
-
-    .btn-warning:hover {
-      background: #e0a800;
-      transform: translateY(-2px);
-    }
-
-    .btn-danger {
-      background: #dc3545;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #c82333;
-      transform: translateY(-2px);
-    }
-
-    .btn-info {
-      background: #17a2b8;
-      color: white;
-    }
-
-    .btn-info:hover {
-      background: #138496;
-      transform: translateY(-2px);
-    }
-
-    /* Enhanced Claims List */
-    .claims-list {
-      max-height: 500px;
-      overflow-y: auto;
-    }
-
-    .claim-item {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-
-    .claim-item:hover {
-      transform: translateX(5px);
-      border-color: #667eea;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .claim-info h4 {
+    label {
+      display: block;
       margin-bottom: 5px;
-      color: #333;
-      font-size: 18px;
+      font-weight: 600;
     }
 
-    .claim-info p {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .claim-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .claim-actions .btn {
-      padding: 10px 16px;
-      font-size: 14px;
-    }
-
-    /* Enhanced Editor */
-    .editor-toolbar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 10px;
-    }
-
-    .editor-toolbar .btn {
-      padding: 12px 18px;
-      font-size: 14px;
-    }
-
-    .editor-textarea {
+    input, select, textarea {
       width: 100%;
-      min-height: 400px;
-      padding: 20px;
-      border: 2px solid #e1e5e9;
-      border-radius: 10px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      resize: vertical;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
     }
 
-    .editor-textarea:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    /* Enhanced Metadata Summary */
-    .metadata-summary {
-      background: #e3f2fd;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-left: 4px solid #667eea;
-    }
-
-    .metadata-summary h4 {
-      margin-bottom: 15px;
-      color: #333;
-      font-size: 18px;
-    }
-
-    .metadata-grid {
+    /* Procedure Selection */
+    .procedure-options {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
+      gap: 15px;
+      margin: 20px 0;
     }
 
-    .metadata-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-
-    .metadata-item:last-child {
-      border-bottom: none;
-    }
-
-    .metadata-label {
-      font-weight: 600;
-      color: #555;
-    }
-
-    .metadata-value {
-      color: #333;
-    }
-
-    /* Enhanced Loading */
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-      text-align: center;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Enhanced Toast */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      z-index: 2000;
-      transform: translateX(400px);
-      transition: transform 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast.success {
-      background: #28a745;
-    }
-
-    .toast.error {
-      background: #dc3545;
-    }
-
-    .toast.info {
-      background: #17a2b8;
-    }
-
-    /* Enhanced Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 50px 20px;
-      color: #666;
-    }
-
-    .empty-state .icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
-    .empty-state h3 {
-      font-size: 22px;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .empty-state p {
-      margin-bottom: 25px;
-      line-height: 1.6;
-    }
-
-    /* Template Preview */
-    .template-preview {
-      background: #f8f9fa;
-      border: 2px dashed #dee2e6;
+    .procedure-card {
+      border: 2px solid #ddd;
+      padding: 15px;
       border-radius: 10px;
-      padding: 20px;
-      margin-top: 15px;
-      font-size: 14px;
-      color: #666;
-      max-height: 200px;
-      overflow-y: auto;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .container {
-        padding: 15px;
-      }
-      
-      .options-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .claim-item {
-        flex-direction: column;
-        text-align: left;
-        gap: 15px;
-      }
-      
-      .claim-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-      
-      .nav-container {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-      }
-      
-      .stats-dropdown {
-        right: auto;
-        left: 0;
-      }
-      
-      .metadata-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .editor-toolbar {
-        justify-content: center;
-      }
+    .procedure-card.selected {
+      border-color: #4CAF50;
+      background: #f0fff0;
+    }
+
+    .procedure-card h4 {
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .procedure-card .cost {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    /* Buttons */
+    .submit-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    /* Results Section */
+    .results-section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .claim-preview {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      white-space: pre-wrap;
+      font-family: monospace;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Enhanced Navigation -->
-    <div class="nav-container">
-      <button class="back-btn" id="backBtn" onclick="goBack()" style="display: none;">
-        <span>←</span> Back
-      </button>
-      
-      <div class="nav-stats">
-        <button class="stats-btn" onclick="toggleStats()">
-          <span>📊</span> Statistics
-        </button>
-        <div class="stats-dropdown" id="statsDropdown">
-          <h4 style="margin-bottom: 15px; color: #333;">System Statistics</h4>
-          
-          <div class="stats-item">
-            <div class="stats-label">
-              <span>📋</span>
-              <span>Total Claims</span>
-            </div>
-            <div class="stats-value" id="totalClaims">0</div>
-          </div>
-          
-          <div class="stats-item">
-            <div class="stats-label">
-              <span>👥</span>
-              <span>Unique Patients</span>
-            </div>
-            <div class="stats-value" id="totalPatients">0</div>
-          </div>
-          
-          <div class="stats-item">
-            <div class="stats-label">
-              <span>📅</span>
-              <span>This Month</span>
-            </div>
-            <div class="stats-value" id="thisMonth">0</div>
-          </div>
-          
-          <div class="stats-item">
-            <div class="stats-label">
-              <span>💰</span>
-              <span>Estimated Value</span>
-            </div>
-            <div class="stats-value" id="totalValue">$0</div>
-          </div>
-          
-          <button class="btn btn-primary" onclick="exportAllClaims()" style="margin-top: 15px; width: 100%; padding: 12px;">
-            Export All Claims
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Header -->
     <div class="header">
       <h1>Medical Billing System</h1>
-      <p id="headerSubtitle">Professional Medical Claims Management</p>
+      <p>Generate insurance claims instantly</p>
     </div>
 
-    <!-- HOME SCREEN -->
-    <div id="homeScreen" class="screen active">
-      <div class="options-grid">
-        <div class="option-card" onclick="showScreen('claimsScreen')">
-          <div class="icon">📋</div>
-          <h3>View Claims</h3>
-          <p>Review and manage all your saved medical claims with advanced filtering options</p>
-        </div>
-        
-        <div class="option-card" onclick="showScreen('newClaimScreen')">
-          <div class="icon">➕</div>
-          <h3>Generate New Claim</h3>
-          <p>Create a new medical billing claim with our intuitive form and templates</p>
-        </div>
-        
-        <div class="option-card" onclick="showScreen('templatesScreen')">
-          <div class="icon">📄</div>
-          <h3>Claim Templates</h3>
-          <p>Access pre-built templates for common medical procedures and encounters</p>
-        </div>
-        
-        <div class="option-card" onclick="showScreen('settingsScreen')">
-          <div class="icon">⚙️</div>
-          <h3>Settings</h3>
-          <p>Customize your billing system preferences and export options</p>
-        </div>
+    <!-- Firebase Auth Section -->
+    <div class="auth-section" id="authSection">
+      <h3>Sign In to Continue</h3>
+      <div class="auth-buttons">
+        <button onclick="signIn()">Sign In with Google</button>
+        <button onclick="signOut()" style="display:none;" id="signOutBtn">Sign Out</button>
+      </div>
+      <div id="userInfo" style="display:none; margin-top:10px;">
+        <p>Welcome, <span id="userName"></span></p>
       </div>
     </div>
 
-    <!-- CLAIMS HISTORY SCREEN -->
-    <div id="claimsScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Saved Claims</h2>
-        
-        <div class="form-group">
-          <input type="text" class="form-control" id="searchInput" placeholder="Search claims by patient name, date, or type...">
-        </div>
-        
-        <div class="claims-list" id="claimsList">
-          <!-- Claims will be populated here -->
-        </div>
-        
-        <div id="noClaimsMessage" class="empty-state">
-          <div class="icon">📋</div>
-          <h3>No saved claims yet</h3>
-          <p>Generate your first medical claim to get started</p>
-          <button class="btn btn-success" onclick="showScreen('newClaimScreen')">Create First Claim</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- NEW CLAIM FORM SCREEN -->
-    <div id="newClaimScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Patient Information</h2>
-        
-        <form id="patientForm">
-          <div class="form-group">
-            <label>Patient Name *</label>
-            <input type="text" class="form-control" id="patientName" required>
-          </div>
-          
-          <div class="form-group">
-            <label>Age *</label>
-            <input type="number" class="form-control" id="age" required min="1" max="120">
-          </div>
-          
-          <div class="form-group">
-            <label>Sex *</label>
-            <select class="form-control" id="sex" required>
-              <option value="">Select...</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Insurance Provider *</label>
-            <input type="text" class="form-control" id="insuranceProvider" required>
-          </div>
-          
-          <div class="form-group">
-            <label>Policy Number *</label>
-            <input type="text" class="form-control" id="policyNumber" required>
-          </div>
-          
-          <div class="form-group">
-            <label>Encounter Type *</label>
-            <select class="form-control" id="encounterType" required>
-              <option value="">Select encounter type...</option>
-              <option value="office-visit">Office Visit</option>
-              <option value="nurse-office">Nurse's Office</option>
-              <option value="x-ray">X-Ray</option>
-              <option value="laboratory">Laboratory</option>
-              <option value="consultation">Consultation</option>
-              <option value="emergency">Emergency Visit</option>
-              <option value="follow-up">Follow-up</option>
-              <option value="physical-exam">Physical Examination</option>
-              <option value="procedure">Medical Procedure</option>
-              <option value="telehealth">Telehealth</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Healthcare Provider *</label>
-            <input type="text" class="form-control" id="healthcareProvider" placeholder="Provider name/account number..." required>
-          </div>
-          
-          <button type="submit" class="btn btn-primary btn-block">Continue to Medical Notes</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- MEDICAL NOTES SCREEN -->
-    <div id="notesScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Medical Notes</h2>
-        
-        <div class="metadata-summary" id="patientSummary">
-          <!-- Patient info summary will appear here -->
-        </div>
-        
-        <div class="form-group">
-          <label>Medical History / Notes *</label>
-          <textarea class="form-control" id="medicalNotes" rows="8" placeholder="Enter symptoms, diagnosis, treatment notes, observations..." required></textarea>
-        </div>
-        
-        <div class="editor-toolbar">
-          <button type="button" class="btn btn-warning" onclick="addTemplate('symptoms')">+ Symptoms</button>
-          <button type="button" class="btn btn-success" onclick="addTemplate('diagnosis')">+ Diagnosis</button>
-          <button type="button" class="btn btn-primary" onclick="addTemplate('treatment')">+ Treatment</button>
-          <button type="button" class="btn btn-info" onclick="addTemplate('medication')">+ Medications</button>
-        </div>
-        
-        <button class="btn btn-success btn-block" onclick="showReviewScreen()">Review & Generate Claim</button>
-      </div>
-    </div>
-
-    <!-- REVIEW & GENERATE SCREEN -->
-    <div id="reviewScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Review Information</h2>
-        
-        <div id="fullPatientSummary" class="metadata-summary">
-          <!-- Complete patient info will appear here -->
-        </div>
-        
-        <div class="form-group">
-          <label>Medical Notes (Editable)</label>
-          <textarea class="form-control" id="finalNotes" rows="6"></textarea>
-        </div>
-        
-        <button class="btn btn-success btn-block" onclick="generateFinalClaim()">
-          <span>🔥</span> Generate Claim
-        </button>
-      </div>
+    <!-- Medical Form (initially hidden) -->
+    <div class="medical-form" id="medicalForm" style="display:none;">
+      <h2>Patient Information</h2>
       
-      <!-- Generated Claim -->
-      <div class="card" id="generatedClaimCard" style="display: none;">
-        <h2 style="margin-bottom: 15px; color: #333;">Generated Medical Claim</h2>
-        <div id="loadingDiv" class="loading" style="display: none;">
-          <div class="spinner"></div>
-          <p>Generating claim with CPT/ICD codes...</p>
+      <div class="form-group">
+        <label>Patient Name:</label>
+        <input type="text" id="patientName" placeholder="Enter patient's full name">
+      </div>
+
+      <div class="form-group">
+        <label>Medical Condition/Symptoms:</label>
+        <textarea id="symptoms" rows="3" placeholder="Describe the patient's condition or symptoms"></textarea>
+      </div>
+
+      <h3>Select Medical Procedure</h3>
+      <div class="procedure-options">
+        <div class="procedure-card" onclick="selectProcedure('clinic_visit')">
+          <h4>Clinic Visit</h4>
+          <p>Routine examination</p>
+          <div class="cost">$75-$150</div>
         </div>
-        <textarea class="editor-textarea" id="claimOutput" style="display: none;"></textarea>
-        <div class="editor-toolbar" id="claimActions" style="display: none;">
-          <button class="btn btn-success" onclick="saveClaim()">💾 Save</button>
-          <button class="btn btn-primary" onclick="shareClaim()">📤 Share</button>
-          <button class="btn btn-warning" onclick="exportToWord()">📝 Word</button>
-          <button class="btn btn-info" onclick="exportToPDF()">📄 PDF</button>
-          <button class="btn btn-danger" onclick="clearClaim()">🗑️ Clear</button>
-          <!-- Add this right after the Generate Claim button -->
-<button class="btn btn-primary btn-block" onclick="showScreen('homeScreen')" style="margin-top: 15px;">🏠 Finish & Return Home</button>
+
+        <div class="procedure-card" onclick="selectProcedure('emergency')">
+          <h4>Emergency</h4>
+          <p>Urgent care visit</p>
+          <div class="cost">$300-$600</div>
+        </div>
+
+        <div class="procedure-card" onclick="selectProcedure('nasal_procedure')">
+          <h4>Nose Mask Treatment</h4>
+          <p>Nasal procedure/care</p>
+          <div class="cost">$150-$350</div>
+        </div>
+
+        <div class="procedure-card" onclick="selectProcedure('vaccination')">
+          <h4>Vaccination</h4>
+          <p>Immunization administration</p>
+          <div class="cost">$25-$50</div>
+        </div>
+
+        <div class="procedure-card" onclick="selectProcedure('blood_test')">
+          <h4>Blood Test</h4>
+          <p>Laboratory analysis</p>
+          <div class="cost">$30-$80</div>
+        </div>
+
+        <div class="procedure-card" onclick="selectProcedure('xray')">
+          <h4>X-Ray</h4>
+          <p>Radiology imaging</p>
+          <div class="cost">$100-$250</div>
         </div>
       </div>
+
+      <button class="submit-btn" onclick="generateClaim()">Generate Insurance Claim</button>
     </div>
 
-    <!-- CLAIM EDITOR SCREEN -->
-    <div id="claimEditorScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Claim Editor</h2>
-        
-        <div class="editor-toolbar">
-          <button class="btn btn-primary" onclick="addLogo('hospital')">🏥 Hospital Header</button>
-          <button class="btn btn-success" onclick="addLogo('clinic')">🩺 Clinic Header</button>
-          <button class="btn btn-warning" onclick="addLogo('custom')">📝 Custom Header</button>
-          <button class="btn btn-primary" onclick="formatText('bold')"><strong>B</strong></button>
-          <button class="btn btn-primary" onclick="formatText('header')">H1</button>
-          <button class="btn btn-success" onclick="applyTemplate('standard')">Standard Template</button>
-          <button class="btn btn-info" onclick="applyTemplate('detailed')">Detailed Template</button>
-        </div>
-        
-        <textarea class="editor-textarea" id="claimEditor"></textarea>
-        
-        <div class="editor-toolbar">
-          <button class="btn btn-success" onclick="saveEditedClaim()">💾 Save Changes</button>
-          <button class="btn btn-warning" onclick="exportToWord()">📝 Export Word</button>
-          <button class="btn btn-info" onclick="exportToPDF()">📄 Export PDF</button>
-          <button class="btn btn-primary" onclick="shareEdited()">📤 Share</button>
-          <button class="btn btn-danger" onclick="showScreen('reviewScreen')">← Back</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TEMPLATES SCREEN -->
-    <div id="templatesScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Claim Templates</h2>
-        <p style="margin-bottom: 20px; color: #666;">Select a template to quickly start a new claim</p>
-        
-        <div class="options-grid">
-          <div class="option-card" onclick="loadTemplate('office-visit')">
-            <div class="icon">🏥</div>
-            <h3>Office Visit</h3>
-            <p>Standard office visit template with common CPT codes</p>
-            <div class="template-preview">CPT: 99213-99215 • ICD-10: Z00.00-Z00.01</div>
-          </div>
-          
-          <div class="option-card" onclick="loadTemplate('emergency')">
-            <div class="icon">🚑</div>
-            <h3>Emergency Visit</h3>
-            <p>Emergency department visit template</p>
-            <div class="template-preview">CPT: 99281-99285 • ICD-10: R00-R99</div>
-          </div>
-          
-          <div class="option-card" onclick="loadTemplate('surgery')">
-            <div class="icon">🔪</div>
-            <h3>Surgical Procedure</h3>
-            <p>Template for surgical procedures with anesthesia notes</p>
-            <div class="template-preview">CPT: 10000-69999 • ICD-10: Various surgical codes</div>
-          </div>
-          
-          <div class="option-card" onclick="loadTemplate('lab')">
-            <div class="icon">🧪</div>
-            <h3>Laboratory Tests</h3>
-            <p>Template for laboratory and diagnostic tests</p>
-            <div class="template-preview">CPT: 80000-89999 • ICD-10: R70-R79</div>
-          </div>
-          
-          <div class="option-card" onclick="loadTemplate('physical-therapy')">
-            <div class="icon">💪</div>
-            <h3>Physical Therapy</h3>
-            <p>Template for physical therapy sessions</p>
-            <div class="template-preview">CPT: 97110-97140 • ICD-10: M25-M26</div>
-          </div>
-          
-          <div class="option-card" onclick="loadTemplate('mental-health')">
-            <div class="icon">🧠</div>
-            <h3>Mental Health</h3>
-            <p>Template for mental health consultations</p>
-            <div class="template-preview">CPT: 90832-90853 • ICD-10: F01-F99</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS SCREEN -->
-    <div id="settingsScreen" class="screen">
-      <div class="card">
-        <h2 style="margin-bottom: 20px; color: #333;">Settings</h2>
-        
-        <div class="form-group">
-          <label>Default Export Format</label>
-          <select class="form-control" id="exportFormat">
-            <option value="txt">Text File (.txt)</option>
-            <option value="word">Microsoft Word (.docx)</option>
-            <option value="pdf">PDF Document (.pdf)</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label>Auto-save Interval (minutes)</label>
-          <input type="number" class="form-control" id="autoSaveInterval" min="1" max="60" value="5">
-        </div>
-        
-        <div class="form-group">
-          <label>Default Clinic Information</label>
-          <textarea class="form-control" id="clinicInfo" placeholder="Enter your clinic name, address, phone number, etc."></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label>Claim Number Prefix</label>
-          <input type="text" class="form-control" id="claimPrefix" placeholder="e.g., CLM-" value="CLM-">
-        </div>
-        
-        <button class="btn btn-success btn-block" onclick="saveSettings()">Save Settings</button>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-          <h3 style="margin-bottom: 15px; color: #333;">Data Management</h3>
-          <div class="editor-toolbar">
-            <button class="btn btn-warning" onclick="backupData()">💾 Backup Data</button>
-            <button class="btn btn-info" onclick="importData()">📥 Import Data</button>
-            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
-          </div>
-        </div>
-      </div>
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection">
+      <h2>Generated Claim</h2>
+      <div class="claim-preview" id="claimPreview"></div>
+      <button class="submit-btn" onclick="saveClaim()">Save Claim to Database</button>
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="toast"></div>
-
   <script>
-    // Global variables
-    const API_BASE = "https://emmanuel154-medical-billing-system24-7.hf.space";
-    let currentPatientData = {};
-    let currentScreen = 'homeScreen';
-    let screenStack = [];
-    let allClaims = [];
-    let currentEditingClaim = null;
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVQ9mcfEIJDShsN7G2zwQw9fmu9LJZmIg",
+      authDomain: "claim-demo-77679.firebaseapp.com",
+      projectId: "claim-demo-77679",
+      storageBucket: "claim-demo-77679.firebasestorage.app",
+      messagingSenderId: "56576633137",
+      appId: "1:56576633137:web:d44014e28fce7e6694e810",
+      measurementId: "G-4F91N7JNEW"
+    };
 
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', function() {
-      loadSavedClaims();
-      updateStatistics();
-      loadSettings();
-      
-      // Form submission handler
-      document.getElementById('patientForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        savePatientData();
-      });
-      
-      // Search functionality
-      document.getElementById('searchInput').addEventListener('input', filterClaims);
-    });
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // Navigation functions
-    function showScreen(screenId, addToStack = true) {
-      // Hide all screens
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      
-      // Show target screen
-      document.getElementById(screenId).classList.add('active');
-      
-      // Update header
-      updateHeader(screenId);
-      
-      // Manage back button and screen stack
-      if (addToStack && screenId !== 'homeScreen') {
-        screenStack.push(currentScreen);
-      }
-      currentScreen = screenId;
-      
-      // Show/hide back button
-      const backBtn = document.getElementById('backBtn');
-      if (screenId === 'homeScreen') {
-        backBtn.style.display = 'none';
-        screenStack = [];
+    let currentUser = null;
+    let selectedProcedure = 'clinic_visit';
+
+    // Firebase Auth State Listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('userName').textContent = user.displayName || user.email;
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('signOutBtn').style.display = 'inline-block';
+        document.getElementById('medicalForm').style.display = 'block';
+        document.getElementById('authSection').style.display = 'none';
       } else {
-        backBtn.style.display = 'flex';
-      }
-      
-      // Update page content based on screen
-      if (screenId === 'claimsScreen') {
-        loadSavedClaims();
-      }
-    }
-
-    function goBack() {
-      if (screenStack.length > 0) {
-        const previousScreen = screenStack.pop();
-        showScreen(previousScreen, false);
-      } else {
-        showScreen('homeScreen');
-      }
-    }
-
-    function updateHeader(screenId) {
-      const subtitle = document.getElementById('headerSubtitle');
-      switch(screenId) {
-        case 'homeScreen':
-          subtitle.textContent = 'Professional Medical Claims Management';
-          break;
-        case 'claimsScreen':
-          subtitle.textContent = 'Saved Claims History';
-          break;
-        case 'newClaimScreen':
-          subtitle.textContent = 'New Claim - Patient Info';
-          break;
-        case 'notesScreen':
-          subtitle.textContent = 'Medical Notes';
-          break;
-        case 'reviewScreen':
-          subtitle.textContent = 'Review & Generate';
-          break;
-        case 'claimEditorScreen':
-          subtitle.textContent = 'Claim Editor';
-          break;
-        case 'templatesScreen':
-          subtitle.textContent = 'Claim Templates';
-          break;
-        case 'settingsScreen':
-          subtitle.textContent = 'System Settings';
-          break;
-      }
-    }
-
-    // Statistics functionality
-    function toggleStats() {
-      const dropdown = document.getElementById('statsDropdown');
-      dropdown.classList.toggle('show');
-      updateStatistics();
-    }
-
-    function updateStatistics() {
-      const savedClaims = JSON.parse(localStorage.getItem('savedClaims') || '[]');
-      
-      // Update total claims
-      document.getElementById('totalClaims').textContent = savedClaims.length;
-      
-      // Update unique patients
-      const uniquePatients = [...new Set(savedClaims.map(claim => claim.patientName))];
-      document.getElementById('totalPatients').textContent = uniquePatients.length;
-      
-      // Update claims this month
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth();
-      const currentYear = currentDate.getFullYear();
-      
-      const claimsThisMonth = savedClaims.filter(claim => {
-        let claimDate;
-        if (claim.date && typeof claim.date === 'string') {
-          claimDate = new Date(claim.date);
-        } else {
-          claimDate = new Date();
-        }
-        return claimDate.getMonth() === currentMonth && claimDate.getFullYear() === currentYear;
-      });
-      
-      document.getElementById('thisMonth').textContent = claimsThisMonth.length;
-      
-      // Update estimated total value
-      const estimatedValue = savedClaims.length * 250;
-      document.getElementById('totalValue').textContent = `$${estimatedValue.toLocaleString()}`;
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-      const statsDropdown = document.getElementById('statsDropdown');
-      const statsBtn = document.querySelector('.stats-btn');
-      
-      if (!statsBtn.contains(event.target) && !statsDropdown.contains(event.target)) {
-        statsDropdown.classList.remove('show');
+        currentUser = null;
+        document.getElementById('medicalForm').style.display = 'none';
+        document.getElementById('resultsSection').style.display = 'none';
+        document.getElementById('authSection').style.display = 'block';
       }
     });
 
-    // Patient data functions
-    function savePatientData() {
-      currentPatientData = {
-        patient_name: document.getElementById('patientName').value,
-        age: parseInt(document.getElementById('age').value),
-        sex: document.getElementById('sex').value,
-        insurance_provider: document.getElementById('insuranceProvider').value,
-        policy_number: document.getElementById('policyNumber').value,
-        encounter_type: document.getElementById('encounterType').value,
-        healthcare_provider: document.getElementById('healthcareProvider').value
-      };
-      
-      showPatientSummary();
-      showScreen('notesScreen');
+    // Auth Functions
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log('Signed in successfully');
+        })
+        .catch((error) => {
+          console.error('Sign in error:', error);
+          alert('Sign in failed. Please try again.');
+        });
     }
 
-    function showPatientSummary() {
-      const summary = `
-        <h4>Patient Summary:</h4>
-        <div class="metadata-grid">
-          <div class="metadata-item">
-            <span class="metadata-label">Name:</span>
-            <span class="metadata-value">${currentPatientData.patient_name}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Age:</span>
-            <span class="metadata-value">${currentPatientData.age}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Insurance:</span>
-            <span class="metadata-value">${currentPatientData.insurance_provider}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Encounter:</span>
-            <span class="metadata-value">${currentPatientData.encounter_type}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Provider:</span>
-            <span class="metadata-value">${currentPatientData.healthcare_provider}</span>
-          </div>
-        </div>
-      `;
-      document.getElementById('patientSummary').innerHTML = summary;
+    function signOut() {
+      auth.signOut()
+        .then(() => {
+          console.log('Signed out successfully');
+        })
+        .catch((error) => {
+          console.error('Sign out error:', error);
+        });
     }
 
-    // Medical notes templates
-    function addTemplate(type) {
-      const textarea = document.getElementById('medicalNotes');
-      const cursorPos = textarea.selectionStart;
-      let templateText = '';
+    // Procedure Selection
+    function selectProcedure(procedure) {
+      selectedProcedure = procedure;
       
-      switch(type) {
-        case 'symptoms':
-          templateText = '\n\nSYMPTOMS:\n- \n- \n- \n';
-          break;
-        case 'diagnosis':
-          templateText = '\n\nDIAGNOSIS:\n\n';
-          break;
-        case 'treatment':
-          templateText = '\n\nTREATMENT PLAN:\n- \n- \n- \n';
-          break;
-        case 'medication':
-          templateText = '\n\nMEDICATIONS:\n- \n- \n- \n';
-          break;
-      }
-      
-      const textBefore = textarea.value.substring(0, cursorPos);
-      const textAfter = textarea.value.substring(cursorPos);
-      textarea.value = textBefore + templateText + textAfter;
-      textarea.focus();
-      textarea.setSelectionRange(cursorPos + templateText.length - 2, cursorPos + templateText.length - 2);
+      // Update UI
+      document.querySelectorAll('.procedure-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      event.currentTarget.classList.add('selected');
     }
 
-    function showReviewScreen() {
-      const medicalNotes = document.getElementById('medicalNotes').value;
-      
-      if (!medicalNotes.trim()) {
-        showToast('Please enter medical notes before continuing', 'error');
+    // Generate Claim
+    async function generateClaim() {
+      const patientName = document.getElementById('patientName').value;
+      const symptoms = document.getElementById('symptoms').value;
+
+      if (!patientName || !symptoms) {
+        alert('Please fill in all fields');
         return;
       }
-      
-      currentPatientData.medical_history = medicalNotes;
-      
-      // Show complete summary
-      const fullSummary = `
-        <h4>Complete Patient Information:</h4>
-        <div class="metadata-grid">
-          <div class="metadata-item">
-            <span class="metadata-label">Name:</span>
-            <span class="metadata-value">${currentPatientData.patient_name}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Age:</span>
-            <span class="metadata-value">${currentPatientData.age}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Sex:</span>
-            <span class="metadata-value">${currentPatientData.sex}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Insurance:</span>
-            <span class="metadata-value">${currentPatientData.insurance_provider}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Policy:</span>
-            <span class="metadata-value">${currentPatientData.policy_number}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Encounter:</span>
-            <span class="metadata-value">${currentPatientData.encounter_type}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Provider:</span>
-            <span class="metadata-value">${currentPatientData.healthcare_provider}</span>
-          </div>
-        </div>
-      `;
-      document.getElementById('fullPatientSummary').innerHTML = fullSummary;
-      document.getElementById('finalNotes').value = medicalNotes;
-      
-      showScreen('reviewScreen');
-    }
 
-    // Claim generation
-    async function generateFinalClaim() {
-      // Update notes if edited
-      currentPatientData.medical_history = document.getElementById('finalNotes').value;
-      
-      // Show loading
-      document.getElementById('generatedClaimCard').style.display = 'block';
-      document.getElementById('loadingDiv').style.display = 'block';
-      document.getElementById('claimOutput').style.display = 'none';
-      document.getElementById('claimActions').style.display = 'none';
-      
-      const payload = {
-        metadata: currentPatientData,
-        text: currentPatientData.medical_history
-      };
-      
+      // Send data to backend
       try {
-        const response = await fetch(`${API_BASE}/submit_text`, {
+        const response = await fetch('/submit_text', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            metadata: {
+              patient_name: patientName,
+              procedure_type: selectedProcedure
+            },
+            text: symptoms
+          })
         });
-        
+
         const data = await response.json();
         
-        document.getElementById('loadingDiv').style.display = 'none';
+        // Display results
+        document.getElementById('claimPreview').textContent = data.claim_text;
+        document.getElementById('resultsSection').style.display = 'block';
         
-        if (data.claim_text) {
-          document.getElementById('claimOutput').style.display = 'block';
-          document.getElementById('claimOutput').value = data.claim_text;
-          document.getElementById('claimActions').style.display = 'flex';
-          showToast('Medical claim generated successfully!', 'success');
-        } else {
-          throw new Error(data.detail || 'Claim generation failed');
-        }
+        // Scroll to results
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        
       } catch (error) {
-        document.getElementById('loadingDiv').style.display = 'none';
-        // Fallback to local generation
-        setTimeout(() => {
-          document.getElementById('claimOutput').style.display = 'block';
-          document.getElementById('claimOutput').value = generateFallbackClaim();
-          document.getElementById('claimActions').style.display = 'flex';
-          showToast('Medical claim generated with fallback template!', 'info');
-        }, 1000);
+        console.error('Error generating claim:', error);
+        alert('Error generating claim. Please try again.');
       }
     }
 
-    function generateFallbackClaim() {
-      const currentDate = new Date().toLocaleDateString();
-      return `MEDICAL BILLING CLAIM
-
-PATIENT INFORMATION:
-═══════════════════════════════════════════════════════════════════════════════════
-Name: ${currentPatientData.patient_name}
-Age: ${currentPatientData.age}
-Sex: ${currentPatientData.sex}
-Insurance Provider: ${currentPatientData.insurance_provider}
-Policy Number: ${currentPatientData.policy_number}
-
-ENCOUNTER DETAILS:
-═══════════════════════════════════════════════════════════════════════════════════
-Date of Service: ${currentDate}
-Encounter Type: ${currentPatientData.encounter_type}
-Healthcare Provider: ${currentPatientData.healthcare_provider}
-
-MEDICAL DOCUMENTATION:
-═══════════════════════════════════════════════════════════════════════════════════
-${currentPatientData.medical_history}
-
-BILLING CODES:
-═══════════════════════════════════════════════════════════════════════════════════
-CPT Code: 99213 (Office/Outpatient Visit, Established Patient)
-ICD-10: Z00.00 (Encounter for general adult medical examination)
-Modifier: None
-
-CLAIM STATUS: Ready for Submission
-Generated: ${new Date().toLocaleString()}
-
-═══════════════════════════════════════════════════════════════════════════════════
-Generated by Medical Billing System
-═══════════════════════════════════════════════════════════════════════════════════`;
-    }
-
-    // Export to Microsoft Word
-    function exportToWord() {
-      const claimText = document.getElementById('claimOutput').value || document.getElementById('claimEditor').value;
-      if (!claimText.trim()) {
-        showToast('No claim content to export', 'error');
+    // Save Claim to Firebase
+    async function saveClaim() {
+      if (!currentUser) {
+        alert('Please sign in to save claims');
         return;
       }
-      
-      // Create HTML content for Word
-      const htmlContent = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word' 
-              xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset="utf-8">
-          <title>Medical Claim</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-            h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-            .section { margin-bottom: 20px; }
-            .label { font-weight: bold; color: #2c3e50; }
-            .value { margin-left: 10px; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-            th { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h1>MEDICAL BILLING CLAIM</h1>
-          <div class="section">
-            <h2>Patient Information</h2>
-            <table>
-              <tr><td class="label">Patient Name:</td><td>${currentPatientData.patient_name || 'N/A'}</td></tr>
-              <tr><td class="label">Age:</td><td>${currentPatientData.age || 'N/A'}</td></tr>
-              <tr><td class="label">Sex:</td><td>${currentPatientData.sex || 'N/A'}</td></tr>
-              <tr><td class="label">Insurance Provider:</td><td>${currentPatientData.insurance_provider || 'N/A'}</td></tr>
-              <tr><td class="label">Policy Number:</td><td>${currentPatientData.policy_number || 'N/A'}</td></tr>
-            </table>
-          </div>
-          <div class="section">
-            <h2>Medical Documentation</h2>
-            <p>${claimText.replace(/\n/g, '<br>')}</p>
-          </div>
-          <div class="section">
-            <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      // Create and download the file
-      const blob = new Blob([htmlContent], { type: 'application/msword' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Medical_Claim_${currentPatientData.patient_name || 'Unknown'}_${new Date().toISOString().slice(0,10)}.doc`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      showToast('Claim exported to Word document!', 'success');
-    }
 
-    // Export to PDF (simplified version)
-    function exportToPDF() {
-      const claimText = document.getElementById('claimOutput').value || document.getElementById('claimEditor').value;
-      if (!claimText.trim()) {
-        showToast('No claim content to export', 'error');
-        return;
-      }
-      
-      // Create printable content
-      const printContent = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
-          <h1 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">MEDICAL BILLING CLAIM</h1>
-          
-          <div style="margin-bottom: 20px;">
-            <h2>Patient Information</h2>
-            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
-              <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Patient Name:</td><td style="padding: 8px; border: 1px solid #ddd;">${currentPatientData.patient_name || 'N/A'}</td></tr>
-              <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Age:</td><td style="padding: 8px; border: 1px solid #ddd;">${currentPatientData.age || 'N/A'}</td></tr>
-              <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Sex:</td><td style="padding: 8px; border: 1px solid #ddd;">${currentPatientData.sex || 'N/A'}</td></tr>
-              <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Insurance Provider:</td><td style="padding: 8px; border: 1px solid #ddd;">${currentPatientData.insurance_provider || 'N/A'}</td></tr>
-              <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Policy Number:</td><td style="padding: 8px; border: 1px solid #ddd;">${currentPatientData.policy_number || 'N/A'}</td></tr>
-            </table>
-          </div>
-          
-          <div style="margin-bottom: 20px;">
-            <h2>Medical Documentation</h2>
-            <div style="white-space: pre-wrap; background: #f9f9f9; padding: 15px; border-radius: 5px;">${claimText}</div>
-          </div>
-          
-          <div style="margin-top: 30px; font-size: 12px; color: #666;">
-            <p>Generated: ${new Date().toLocaleString()}</p>
-          </div>
-        </div>
-      `;
-      
-      // Open print dialog for PDF creation
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Medical Claim - ${currentPatientData.patient_name || 'Unknown'}</title>
-            <style>
-              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-              @media print {
-                body { margin: 0; }
-              }
-            </style>
-          </head>
-          <body>${printContent}</body>
-        </html>
-      `);
-      printWindow.document.close();
-      
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
-      
-      showToast('Opening PDF print dialog...', 'info');
-    }
-
-    // Template functions - FIXED VERSION
-    function loadTemplate(type) {
-      let templateData = {};
-      
-      switch(type) {
-        case 'office-visit':
-          templateData = {
-            patient_name: 'John Smith',
-            age: 45,
-            sex: 'Male',
-            insurance_provider: 'Blue Cross',
-            policy_number: 'BC123456',
-            encounter_type: 'office-visit',
-            healthcare_provider: 'Dr. Johnson',
-            medical_history: 'Patient presented for routine office visit. Vital signs stable. Discussed ongoing treatment plan.\n\nASSESSMENT:\n- Stable condition\n- No acute concerns\n\nPLAN:\n- Continue current medications\n- Follow-up in 3 months\n- Routine labs ordered'
-          };
-          break;
-        case 'emergency':
-          templateData = {
-            patient_name: 'Maria Garcia',
-            age: 32,
-            sex: 'Female',
-            insurance_provider: 'Aetna',
-            policy_number: 'AE789012',
-            encounter_type: 'emergency',
-            healthcare_provider: 'Emergency Dept',
-            medical_history: 'Patient presented to emergency department with acute symptoms. Initial assessment completed.\n\nTRIAGE:\n- Priority: Urgent\n- Vital signs: Stable\n\nASSESSMENT:\n- Acute symptoms requiring intervention\n\nTREATMENT:\n- Emergency medications administered\n- Monitoring continued'
-          };
-          break;
-        case 'surgery':
-          templateData = {
-            patient_name: 'Robert Johnson',
-            age: 58,
-            sex: 'Male',
-            insurance_provider: 'United Healthcare',
-            policy_number: 'UH345678',
-            encounter_type: 'procedure',
-            healthcare_provider: 'Surgical Center',
-            medical_history: 'Patient underwent scheduled surgical procedure. Procedure completed without complications.\n\nPROCEDURE DETAILS:\n- Type: Elective surgery\n- Anesthesia: General\n- Duration: 2 hours\n\nPOST-OP:\n- Stable in recovery\n- Pain managed appropriately\n- Discharge planning initiated'
-          };
-          break;
-        case 'lab':
-          templateData = {
-            patient_name: 'Sarah Wilson',
-            age: 29,
-            sex: 'Female',
-            insurance_provider: 'Cigna',
-            policy_number: 'CI901234',
-            encounter_type: 'laboratory',
-            healthcare_provider: 'LabCorp',
-            medical_history: 'Laboratory tests ordered and completed. Results reviewed with patient.\n\nTESTS ORDERED:\n- Complete Blood Count\n- Comprehensive Metabolic Panel\n- Lipid Profile\n\nRESULTS:\n- Within normal limits\n- No significant abnormalities noted'
-          };
-          break;
-        case 'physical-therapy':
-          templateData = {
-            patient_name: 'Michael Brown',
-            age: 67,
-            sex: 'Male',
-            insurance_provider: 'Medicare',
-            policy_number: 'MC567890',
-            encounter_type: 'physical-therapy',
-            healthcare_provider: 'PT Clinic',
-            medical_history: 'Physical therapy session conducted for rehabilitation.\n\nSESSION FOCUS:\n- Range of motion exercises\n- Strength training\n- Pain management techniques\n\nPROGRESS:\n- Good participation\n- Improved mobility noted\n- Continued therapy recommended'
-          };
-          break;
-        case 'mental-health':
-          templateData = {
-            patient_name: 'Jennifer Lee',
-            age: 41,
-            sex: 'Female',
-            insurance_provider: 'Kaiser',
-            policy_number: 'KR123890',
-            encounter_type: 'consultation',
-            healthcare_provider: 'Mental Health Center',
-            medical_history: 'Mental health consultation session completed.\n\nSESSION NOTES:\n- Patient engaged well in therapy\n- Discussed coping strategies\n- Addressed current stressors\n\nASSESSMENT:\n- Stable mood\n- Good insight\n- Continued therapy beneficial'
-          };
-          break;
-      }
-      
-      // Apply template data to current form
-      currentPatientData = templateData;
-      
-      // Fill the form with template data
-      document.getElementById('patientName').value = templateData.patient_name;
-      document.getElementById('age').value = templateData.age;
-      document.getElementById('sex').value = templateData.sex;
-      document.getElementById('insuranceProvider').value = templateData.insurance_provider;
-      document.getElementById('policyNumber').value = templateData.policy_number;
-      document.getElementById('encounterType').value = templateData.encounter_type;
-      document.getElementById('healthcareProvider').value = templateData.healthcare_provider;
-      
-      // Show success message and go to medical notes screen
-      showToast(`"${type.replace('-', ' ')}" template loaded successfully!`, 'success');
-      showScreen('notesScreen');
-      
-      // Pre-fill medical notes if available
-      setTimeout(() => {
-        if (templateData.medical_history) {
-          document.getElementById('medicalNotes').value = templateData.medical_history;
-        }
-      }, 500);
-    }
-
-    // Enhanced template application in editor
-    function applyTemplate(type) {
-      const editor = document.getElementById('claimEditor');
-      let template = '';
-      
-      if (type === 'standard') {
-        template = `MEDICAL CLAIM REPORT
-
-PATIENT INFORMATION:
-════════════════════════════════════════════════════════════════
-Name: ${currentPatientData.patient_name || ''}
-Date of Birth: 
-Insurance ID: ${currentPatientData.policy_number || ''}
-Policy Number: ${currentPatientData.policy_number || ''}
-
-PROVIDER INFORMATION:
-════════════════════════════════════════════════════════════════
-Provider Name: ${currentPatientData.healthcare_provider || ''}
-NPI Number: 
-Address: 
-
-SERVICE DETAILS:
-════════════════════════════════════════════════════════════════
-Date of Service: ${new Date().toLocaleDateString()}
-Place of Service: 
-Diagnosis Codes (ICD-10): 
-Procedure Codes (CPT): 
-
-CLINICAL DOCUMENTATION:
-════════════════════════════════════════════════════════════════
-
-
-BILLING INFORMATION:
-════════════════════════════════════════════════════════════════
-Total Charges: $
-Patient Responsibility: $
-Insurance Coverage: $
-
-Provider Signature: ___________________ Date: __________`;
-      } else if (type === 'detailed') {
-        template = `COMPREHENSIVE MEDICAL CLAIM
-
-PATIENT DEMOGRAPHICS:
-────────────────────────────────────────────────────────────────
-• Full Name: ${currentPatientData.patient_name || ''}
-• Date of Birth: 
-• Age: ${currentPatientData.age || ''}
-• Gender: ${currentPatientData.sex || ''}
-• Contact Information: 
-
-INSURANCE INFORMATION:
-────────────────────────────────────────────────────────────────
-• Provider: ${currentPatientData.insurance_provider || ''}
-• Policy Number: ${currentPatientData.policy_number || ''}
-• Group Number: 
-• Effective Date: 
-
-ENCOUNTER DETAILS:
-────────────────────────────────────────────────────────────────
-• Date of Service: ${new Date().toLocaleDateString()}
-• Encounter Type: ${currentPatientData.encounter_type || ''}
-• Location: 
-• Referring Physician: 
-
-CLINICAL ASSESSMENT:
-────────────────────────────────────────────────────────────────
-• Chief Complaint: 
-• History of Present Illness: 
-• Review of Systems: 
-• Physical Examination: 
-• Assessment/Diagnosis: 
-• Treatment Plan: 
-
-PROCEDURES & SERVICES:
-────────────────────────────────────────────────────────────────
-• CPT Codes: 
-• Modifiers: 
-• Units: 
-• Description: 
-
-DIAGNOSIS CODES:
-────────────────────────────────────────────────────────────────
-• Primary ICD-10: 
-• Secondary ICD-10: 
-• Tertiary ICD-10: 
-
-ADDITIONAL INFORMATION:
-────────────────────────────────────────────────────────────────
-• Special Circumstances: 
-• Additional Documentation: 
-• Follow-up Requirements: 
-
-AUTHORIZATION:
-────────────────────────────────────────────────────────────────
-Provider Signature: _________________________
-Date: __________
-NPI: __________`;
-      }
-      
-      editor.value = template;
-      editor.focus();
-      showToast(`${type} template applied!`, 'success');
-    }
-
-    // [Include all remaining functions from the original code]
-    // Claim management functions, settings functions, etc.
-
-    function saveClaim() {
-      const claimText = document.getElementById('claimOutput').value;
-      if (!claimText.trim()) {
-        showToast('No claim to save', 'error');
-        return;
-      }
-      
-      const newClaim = {
-        id: Date.now(),
-        patientName: currentPatientData.patient_name,
-        date: new Date().toLocaleDateString(),
-        encounter: currentPatientData.encounter_type,
-        claimText: claimText,
-        fileName: `Claim_${currentPatientData.patient_name}_${new Date().toISOString().slice(0,19)}.txt`
+      const claimData = {
+        patientName: document.getElementById('patientName').value,
+        symptoms: document.getElementById('symptoms').value,
+        procedure: selectedProcedure,
+        claimText: document.getElementById('claimPreview').textContent,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: currentUser.uid
       };
-      
-      // Save to localStorage for claims history
-      const savedClaims = JSON.parse(localStorage.getItem('savedClaims') || '[]');
-      savedClaims.unshift(newClaim);
-      localStorage.setItem('savedClaims', JSON.stringify(savedClaims));
-      
-      // Download file
-      const blob = new Blob([claimText], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = newClaim.fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      showToast('Claim saved successfully!', 'success');
-      loadSavedClaims();
-      updateStatistics();
-    }
 
-    function shareClaim() {
-      const claimText = document.getElementById('claimOutput').value;
-      
-      if (navigator.share) {
-        navigator.share({
-          title: `Medical Claim - ${currentPatientData.patient_name}`,
-          text: claimText
-        });
-      } else {
-        navigator.clipboard.writeText(claimText).then(() => {
-          showToast('Claim copied to clipboard!', 'success');
-        });
+      try {
+        await db.collection('claims').add(claimData);
+        alert('Claim saved successfully!');
+      } catch (error) {
+        console.error('Error saving claim:', error);
+        alert('Error saving claim. Please try again.');
       }
     }
 
-    function editClaim() {
-      const claimText = document.getElementById('claimOutput').value;
-      document.getElementById('claimEditor').value = claimText;
-      showScreen('claimEditorScreen');
-    }
-
-    function clearClaim() {
-      document.getElementById('claimOutput').value = '';
-      document.getElementById('generatedClaimCard').style.display = 'none';
-    }
-
-    // Claims list functions
-    function loadSavedClaims() {
-      allClaims = JSON.parse(localStorage.getItem('savedClaims') || '[]');
-      displayClaims(allClaims);
-    }
-
-    function displayClaims(claims) {
-      const claimsList = document.getElementById('claimsList');
-      const noClaimsMessage = document.getElementById('noClaimsMessage');
-      
-      if (claims.length === 0) {
-        claimsList.innerHTML = '';
-        noClaimsMessage.style.display = 'block';
-        return;
-      }
-      
-      noClaimsMessage.style.display = 'none';
-      claimsList.innerHTML = claims.map(claim => `
-        <div class="claim-item">
-          <div class="claim-info">
-            <h4>${claim.patientName}</h4>
-            <p>${claim.date} - ${claim.encounter}</p>
-          </div>
-          <div class="claim-actions">
-            <button class="btn btn-primary" onclick="viewClaim(${claim.id})">View</button>
-            <button class="btn btn-danger" onclick="deleteClaim(${claim.id})">Delete</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function filterClaims() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allClaims.filter(claim => 
-        claim.patientName.toLowerCase().includes(searchTerm) ||
-        claim.encounter.toLowerCase().includes(searchTerm) ||
-        claim.date.toLowerCase().includes(searchTerm)
-      );
-      displayClaims(filtered);
-    }
-
-    function viewClaim(claimId) {
-      const claim = allClaims.find(c => c.id === claimId);
-      if (claim) {
-        currentEditingClaim = claim;
-        document.getElementById('claimEditor').value = claim.claimText;
-        showScreen('claimEditorScreen');
-      }
-    }
-
-    function deleteClaim(claimId) {
-      if (confirm('Are you sure you want to delete this claim?')) {
-        allClaims = allClaims.filter(c => c.id !== claimId);
-        localStorage.setItem('savedClaims', JSON.stringify(allClaims));
-        displayClaims(allClaims);
-        updateStatistics();
-        showToast('Claim deleted successfully', 'success');
-      }
-    }
-
-    // Claim editor functions
-    function addLogo(type) {
-      const editor = document.getElementById('claimEditor');
-      let logoText = '';
-      
-      switch(type) {
-        case 'hospital':
-          logoText = `
-╔══════════════════════════════════════════════════════════════════════════════════════╗
-║                                    MEDICAL CENTER                                    ║
-║                              Professional Healthcare Services                        ║
-║                           📧 info@medicalcenter.com | 📞 (555) 123-4567              ║
-╚══════════════════════════════════════════════════════════════════════════════════════╝
-
-`;
-          break;
-        case 'clinic':
-          logoText = `
-═══════════════════════════════════════════════════════════════════════════════════════
-                                    FAMILY CLINIC
-                                Quality Healthcare for All
-                        📞 (555) 123-4567 | 📧 clinic@familycare.com
-═══════════════════════════════════════════════════════════════════════════════════════
-
-`;
-          break;
-        case 'custom':
-          const companyName = prompt('Enter company/clinic name:') || 'MEDICAL PRACTICE';
-          const phone = prompt('Enter phone number:') || '(555) 123-4567';
-          const email = prompt('Enter email:') || 'info@practice.com';
-          logoText = `
-╔══════════════════════════════════════════════════════════════════════════════════════╗
-║                                ${companyName.toUpperCase().padStart(20).padEnd(40)}                               ║
-║                        📞 ${phone} | 📧 ${email}                         ║
-╚══════════════════════════════════════════════════════════════════════════════════════╝
-
-`;
-          break;
-      }
-      
-      editor.value = logoText + editor.value;
-      editor.focus();
-    }
-
-    function formatText(type) {
-      const editor = document.getElementById('claimEditor');
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const selectedText = editor.value.substring(start, end);
-      
-      let formattedText = '';
-      switch(type) {
-        case 'bold':
-          formattedText = `**${selectedText || 'BOLD TEXT'}**`;
-          break;
-        case 'header':
-          formattedText = `\n═══ ${selectedText || 'HEADER'} ═══\n`;
-          break;
-      }
-      
-      const textBefore = editor.value.substring(0, start);
-      const textAfter = editor.value.substring(end);
-      editor.value = textBefore + formattedText + textAfter;
-      editor.focus();
-    }
-
-    function saveEditedClaim() {
-      if (!currentEditingClaim) {
-        showToast('No claim being edited', 'error');
-        return;
-      }
-      
-      const editedText = document.getElementById('claimEditor').value;
-      currentEditingClaim.claimText = editedText;
-      
-      // Update in storage
-      const claimIndex = allClaims.findIndex(c => c.id === currentEditingClaim.id);
-      if (claimIndex !== -1) {
-        allClaims[claimIndex] = currentEditingClaim;
-        localStorage.setItem('savedClaims', JSON.stringify(allClaims));
-        showToast('Claim updated successfully!', 'success');
-      }
-    }
-
-    function shareEdited() {
-      const claimText = document.getElementById('claimEditor').value;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(claimText).then(() => {
-          showToast('Claim copied to clipboard!', 'success');
-        });
-      } else {
-        showToast('Sharing not supported in this browser', 'error');
-      }
-    }
-
-    function printClaim() {
-      const claimText = document.getElementById('claimEditor').value;
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-        <head><title>Medical Claim</title></head>
-        <body style="font-family: monospace; white-space: pre-wrap; padding: 20px;">
-        ${claimText}
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
-    }
-
-    // Settings functions
-    function loadSettings() {
-      const settings = JSON.parse(localStorage.getItem('appSettings') || '{}');
-      document.getElementById('exportFormat').value = settings.exportFormat || 'txt';
-      document.getElementById('autoSaveInterval').value = settings.autoSaveInterval || 5;
-      document.getElementById('clinicInfo').value = settings.clinicInfo || '';
-      document.getElementById('claimPrefix').value = settings.claimPrefix || 'CLM-';
-    }
-
-    function saveSettings() {
-      const settings = {
-        exportFormat: document.getElementById('exportFormat').value,
-        autoSaveInterval: parseInt(document.getElementById('autoSaveInterval').value),
-        clinicInfo: document.getElementById('clinicInfo').value,
-        claimPrefix: document.getElementById('claimPrefix').value
-      };
-      
-      localStorage.setItem('appSettings', JSON.stringify(settings));
-      showToast('Settings saved successfully!', 'success');
-    }
-
-    function backupData() {
-      const data = {
-        claims: JSON.parse(localStorage.getItem('savedClaims') || '[]'),
-        settings: JSON.parse(localStorage.getItem('appSettings') || '{}'),
-        backupDate: new Date().toISOString()
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `medical_billing_backup_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      showToast('Data backup created!', 'success');
-    }
-
-    function importData() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = function(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const data = JSON.parse(e.target.result);
-            if (data.claims) localStorage.setItem('savedClaims', JSON.stringify(data.claims));
-            if (data.settings) localStorage.setItem('appSettings', JSON.stringify(data.settings));
-            loadSavedClaims();
-            loadSettings();
-            updateStatistics();
-            showToast('Data imported successfully!', 'success');
-          } catch (error) {
-            showToast('Error importing data: Invalid file format', 'error');
-          }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
-
-    function clearAllData() {
-      if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-        localStorage.removeItem('savedClaims');
-        localStorage.removeItem('appSettings');
-        loadSavedClaims();
-        updateStatistics();
-        showToast('All data cleared!', 'success');
-      }
-    }
-
-    function exportAllClaims() {
-      const savedClaims = JSON.parse(localStorage.getItem('savedClaims') || '[]');
-      if (savedClaims.length === 0) {
-        showToast('No claims to export', 'error');
-        return;
-      }
-      
-      let exportText = `MEDICAL CLAIMS EXPORT\nGenerated: ${new Date().toLocaleString()}\n${'='.repeat(80)}\n\n`;
-      
-      savedClaims.forEach((claim, index) => {
-        exportText += `CLAIM #${index + 1}\n`;
-        exportText += `Patient: ${claim.patientName}\n`;
-        exportText += `Date: ${claim.date}\n`;
-        exportText += `Encounter: ${claim.encounter}\n`;
-        exportText += `${'-'.repeat(40)}\n`;
-        exportText += `${claim.claimText}\n`;
-        exportText += `${'='.repeat(80)}\n\n`;
-      });
-      
-      downloadTextFile(exportText, `medical_claims_export_${new Date().toISOString().slice(0,10)}.txt`);
-    }
-
-    function downloadTextFile(content, filename) {
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('File downloaded successfully!', 'success');
-    }
-
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = `toast ${type}`;
-      toast.classList.add('show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
+    // Initialize procedure selection
+    document.querySelector('.procedure-card').classList.add('selected');
   </script>
 </body>
 </html>
