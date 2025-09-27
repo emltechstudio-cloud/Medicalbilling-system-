@@ -6,13 +6,11 @@
   <title>Medical Billing System</title>
   <!-- Firebase SDK v9+ -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+    import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged, getRedirectResult } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBVQ9mcfEIJDShsN7G2zwQw9fmu9LJZmIg",
       authDomain: "claim-demo-77679.firebaseapp.com",
@@ -23,25 +21,39 @@
       measurementId: "G-4F91N7JNEW"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    // Make Firebase available globally
+    // Set custom parameters for business emails
+    provider.setCustomParameters({
+      prompt: 'select_account',
+      hd: '*' // Allow any domain, you can restrict to specific domains like 'yourcompany.com'
+    });
+
     window.firebase = {
       auth,
       db,
       provider,
-      signInWithPopup,
+      signInWithRedirect,
       signOut,
       onAuthStateChanged,
+      getRedirectResult,
       collection,
       addDoc,
       serverTimestamp
     };
+
+    // Handle redirect result
+    getRedirectResult(auth).then((result) => {
+      if (result) {
+        console.log('Redirect sign-in successful:', result.user);
+      }
+    }).catch((error) => {
+      console.error('Redirect sign-in error:', error);
+    });
   </script>
   
   <style>
@@ -82,36 +94,81 @@
     /* Auth Section */
     .auth-section {
       background: white;
-      padding: 30px;
+      padding: 40px;
       border-radius: 15px;
       margin-bottom: 20px;
       text-align: center;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .auth-buttons button {
-      background: #4285f4;
-      color: white;
-      border: none;
+    .auth-section h2 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .auth-section p {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .google-signin-btn {
+      background: white;
+      color: #757575;
+      border: 2px solid #ddd;
       padding: 12px 24px;
-      margin: 10px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
       font-weight: 600;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
     }
 
-    .auth-buttons button:hover {
-      background: #3367d6;
+    .google-signin-btn:hover {
+      border-color: #4285f4;
+      box-shadow: 0 2px 8px rgba(66, 133, 244, 0.2);
     }
 
-    .auth-buttons button#signOutBtn {
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sign-out-btn {
       background: #ea4335;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 15px;
     }
 
-    .auth-buttons button#signOutBtn:hover {
+    .sign-out-btn:hover {
       background: #d33426;
+    }
+
+    .user-info {
+      background: #e8f5e8;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .user-info h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
     }
 
     /* Medical Form */
@@ -134,7 +191,7 @@
       color: #2c3e50;
     }
 
-    input, select, textarea {
+    input, textarea {
       width: 100%;
       padding: 12px;
       border: 2px solid #ddd;
@@ -143,7 +200,7 @@
       transition: border-color 0.3s ease;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus, textarea:focus {
       outline: none;
       border-color: #4285f4;
     }
@@ -238,14 +295,6 @@
       overflow-y: auto;
     }
 
-    .user-info {
-      background: #e8f5e8;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      display: none;
-    }
-
     .loading {
       display: none;
       text-align: center;
@@ -266,6 +315,15 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -278,14 +336,23 @@
     <!-- Firebase Auth Section -->
     <div class="auth-section" id="authSection">
       <h2>Welcome to Medical Billing System</h2>
-      <p>Please sign in to generate insurance claims</p>
-      <div class="auth-buttons">
-        <button onclick="signIn()">Sign In with Google</button>
-        <button onclick="signOut()" style="display:none;" id="signOutBtn">Sign Out</button>
-      </div>
-      <div class="user-info" id="userInfo">
-        <p>Welcome, <strong><span id="userName"></span></strong></p>
-        <p>Email: <span id="userEmail"></span></p>
+      <p>Sign in with your Google account to get started</p>
+      
+      <button class="google-signin-btn" onclick="signIn()">
+        <svg class="google-icon" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <div class="user-info" id="userInfo" style="display: none;">
+        <h3>Welcome!</h3>
+        <p><strong>Name:</strong> <span id="userName"></span></p>
+        <p><strong>Email:</strong> <span id="userEmail"></span></p>
+        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
       </div>
     </div>
 
@@ -293,6 +360,11 @@
     <div class="loading" id="loading">
       <div class="loading-spinner"></div>
       <p>Processing your request...</p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      Claim saved successfully!
     </div>
 
     <!-- Medical Form -->
@@ -334,18 +406,6 @@
           <p>Immunization administration</p>
           <div class="cost">$25-$50</div>
         </div>
-
-        <div class="procedure-card" onclick="selectProcedure('blood_test')">
-          <h4>Blood Test</h4>
-          <p>Laboratory analysis and diagnostics</p>
-          <div class="cost">$30-$80</div>
-        </div>
-
-        <div class="procedure-card" onclick="selectProcedure('xray')">
-          <h4>X-Ray</h4>
-          <p>Radiology imaging services</p>
-          <div class="cost">$100-$250</div>
-        </div>
       </div>
 
       <button class="submit-btn" onclick="generateClaim()">Generate Insurance Claim</button>
@@ -360,7 +420,6 @@
   </div>
 
   <script>
-    // Global variables
     let currentUser = null;
     let selectedProcedure = 'clinic_visit';
     let currentClaimData = null;
@@ -371,25 +430,36 @@
         initializeAuth();
       } else {
         console.error('Firebase not loaded');
-        document.getElementById('authSection').innerHTML = 
-          '<p style="color: red;">Error loading Firebase. Please refresh the page.</p>';
+        showError('Firebase not loaded. Please refresh the page.');
       }
     }, 1000);
 
     function initializeAuth() {
-      const { auth, onAuthStateChanged } = window.firebase;
+      const { auth, onAuthStateChanged, getRedirectResult } = window.firebase;
       
+      // Check for redirect result
+      getRedirectResult(auth).then((result) => {
+        if (result) {
+          console.log('Redirect sign-in successful');
+        }
+      }).catch((error) => {
+        console.error('Redirect error:', error);
+        showError('Authentication error: ' + error.message);
+      });
+
       // Auth state listener
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
           showUserInfo(user);
           showMedicalForm();
+          hideLoading();
         } else {
           currentUser = null;
           hideMedicalForm();
           hideResults();
           showAuthSection();
+          hideLoading();
         }
       });
     }
@@ -398,7 +468,6 @@
       document.getElementById('userName').textContent = user.displayName || 'User';
       document.getElementById('userEmail').textContent = user.email;
       document.getElementById('userInfo').style.display = 'block';
-      document.getElementById('signOutBtn').style.display = 'inline-block';
     }
 
     function showAuthSection() {
@@ -433,18 +502,30 @@
       document.getElementById('loading').style.display = 'none';
     }
 
-    // Auth Functions
+    function showSuccess(message) {
+      const successEl = document.getElementById('successMessage');
+      successEl.textContent = message;
+      successEl.style.display = 'block';
+      setTimeout(() => {
+        successEl.style.display = 'none';
+      }, 3000);
+    }
+
+    function showError(message) {
+      alert('Error: ' + message);
+    }
+
+    // Auth Functions - Using REDIRECT instead of POPUP
     async function signIn() {
-      const { auth, signInWithPopup, provider } = window.firebase;
+      const { auth, signInWithRedirect, provider } = window.firebase;
       
       try {
         showLoading();
-        const result = await signInWithPopup(auth, provider);
-        console.log('Signed in successfully:', result.user);
+        await signInWithRedirect(auth, provider);
+        // The page will redirect to Google sign-in, then back to this page
       } catch (error) {
         console.error('Sign in error:', error);
-        alert('Sign in failed: ' + error.message);
-      } finally {
+        showError('Sign in failed: ' + error.message);
         hideLoading();
       }
     }
@@ -455,10 +536,10 @@
       try {
         showLoading();
         await signOut(auth);
-        console.log('Signed out successfully');
+        showSuccess('Signed out successfully');
       } catch (error) {
         console.error('Sign out error:', error);
-        alert('Sign out failed: ' + error.message);
+        showError('Sign out failed: ' + error.message);
       } finally {
         hideLoading();
       }
@@ -468,7 +549,6 @@
     function selectProcedure(procedure) {
       selectedProcedure = procedure;
       
-      // Update UI
       document.querySelectorAll('.procedure-card').forEach(card => {
         card.classList.remove('selected');
       });
@@ -509,16 +589,13 @@
         const data = await response.json();
         currentClaimData = data;
         
-        // Display results
         document.getElementById('claimPreview').textContent = data.claim_text;
         showResults();
-        
-        // Scroll to results
         document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         
       } catch (error) {
         console.error('Error generating claim:', error);
-        alert('Error generating claim: ' + error.message);
+        showError('Error generating claim: ' + error.message);
       } finally {
         hideLoading();
       }
@@ -548,16 +625,17 @@
         cptCode: currentClaimData.cpt.code,
         timestamp: serverTimestamp(),
         userId: currentUser.uid,
-        userEmail: currentUser.email
+        userEmail: currentUser.email,
+        userName: currentUser.displayName
       };
 
       try {
         showLoading();
         const docRef = await addDoc(collection(db, 'claims'), claimData);
-        alert('Claim saved successfully with ID: ' + docRef.id);
+        showSuccess('Claim saved successfully! Document ID: ' + docRef.id);
       } catch (error) {
         console.error('Error saving claim:', error);
-        alert('Error saving claim: ' + error.message);
+        showError('Error saving claim: ' + error.message);
       } finally {
         hideLoading();
       }
@@ -569,4 +647,4 @@
     });
   </script>
 </body>
-          </html>
+  </html>
