@@ -4,11 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Medical Billing System</title>
-  <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+  <!-- Firebase SDK v9+ -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVQ9mcfEIJDShsN7G2zwQw9fmu9LJZmIg",
+      authDomain: "claim-demo-77679.firebaseapp.com",
+      projectId: "claim-demo-77679",
+      storageBucket: "claim-demo-77679.firebasestorage.app",
+      messagingSenderId: "56576633137",
+      appId: "1:56576633137:web:d44014e28fce7e6694e810",
+      measurementId: "G-4F91N7JNEW"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // Make Firebase available globally
+    window.firebase = {
+      auth,
+      db,
+      provider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged,
+      collection,
+      addDoc,
+      serverTimestamp
+    };
+  </script>
   
   <style>
     * {
@@ -48,20 +82,36 @@
     /* Auth Section */
     .auth-section {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 30px;
+      border-radius: 15px;
       margin-bottom: 20px;
       text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
 
     .auth-buttons button {
-      background: #4CAF50;
+      background: #4285f4;
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin: 5px;
-      border-radius: 5px;
+      padding: 12px 24px;
+      margin: 10px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .auth-buttons button:hover {
+      background: #3367d6;
+    }
+
+    .auth-buttons button#signOutBtn {
+      background: #ea4335;
+    }
+
+    .auth-buttons button#signOutBtn:hover {
+      background: #d33426;
     }
 
     /* Medical Form */
@@ -70,6 +120,7 @@
       padding: 30px;
       border-radius: 15px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      display: none;
     }
 
     .form-group {
@@ -78,8 +129,9 @@
 
     label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
       font-weight: 600;
+      color: #2c3e50;
     }
 
     input, select, textarea {
@@ -88,43 +140,64 @@
       border: 2px solid #ddd;
       border-radius: 8px;
       font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4285f4;
     }
 
     /* Procedure Selection */
     .procedure-options {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 15px;
       margin: 20px 0;
     }
 
     .procedure-card {
-      border: 2px solid #ddd;
-      padding: 15px;
+      border: 2px solid #e0e0e0;
+      padding: 20px;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    .procedure-card:hover {
+      border-color: #4285f4;
+      transform: translateY(-2px);
     }
 
     .procedure-card.selected {
-      border-color: #4CAF50;
-      background: #f0fff0;
+      border-color: #4285f4;
+      background: #e8f0fe;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
     }
 
     .procedure-card h4 {
       color: #2c3e50;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .procedure-card p {
+      color: #666;
+      margin-bottom: 10px;
+      font-size: 14px;
     }
 
     .procedure-card .cost {
       color: #e74c3c;
       font-weight: bold;
+      font-size: 16px;
     }
 
     /* Buttons */
     .submit-btn {
-      background: #3498db;
+      background: #34a853;
       color: white;
       border: none;
       padding: 15px 30px;
@@ -133,6 +206,12 @@
       cursor: pointer;
       width: 100%;
       margin-top: 20px;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background: #2e8b47;
     }
 
     /* Results Section */
@@ -142,6 +221,7 @@
       border-radius: 15px;
       margin-top: 20px;
       display: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
 
     .claim-preview {
@@ -150,7 +230,41 @@
       border-radius: 10px;
       margin: 20px 0;
       white-space: pre-wrap;
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid #e0e0e0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .user-info {
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4285f4;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -158,32 +272,40 @@
   <div class="container">
     <div class="header">
       <h1>Medical Billing System</h1>
-      <p>Generate insurance claims instantly</p>
+      <p>Generate professional insurance claims instantly</p>
     </div>
 
     <!-- Firebase Auth Section -->
     <div class="auth-section" id="authSection">
-      <h3>Sign In to Continue</h3>
+      <h2>Welcome to Medical Billing System</h2>
+      <p>Please sign in to generate insurance claims</p>
       <div class="auth-buttons">
         <button onclick="signIn()">Sign In with Google</button>
         <button onclick="signOut()" style="display:none;" id="signOutBtn">Sign Out</button>
       </div>
-      <div id="userInfo" style="display:none; margin-top:10px;">
-        <p>Welcome, <span id="userName"></span></p>
+      <div class="user-info" id="userInfo">
+        <p>Welcome, <strong><span id="userName"></span></strong></p>
+        <p>Email: <span id="userEmail"></span></p>
       </div>
     </div>
 
-    <!-- Medical Form (initially hidden) -->
-    <div class="medical-form" id="medicalForm" style="display:none;">
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <p>Processing your request...</p>
+    </div>
+
+    <!-- Medical Form -->
+    <div class="medical-form" id="medicalForm">
       <h2>Patient Information</h2>
       
       <div class="form-group">
-        <label>Patient Name:</label>
+        <label for="patientName">Patient Name:</label>
         <input type="text" id="patientName" placeholder="Enter patient's full name">
       </div>
 
       <div class="form-group">
-        <label>Medical Condition/Symptoms:</label>
+        <label for="symptoms">Medical Condition/Symptoms:</label>
         <textarea id="symptoms" rows="3" placeholder="Describe the patient's condition or symptoms"></textarea>
       </div>
 
@@ -191,19 +313,19 @@
       <div class="procedure-options">
         <div class="procedure-card" onclick="selectProcedure('clinic_visit')">
           <h4>Clinic Visit</h4>
-          <p>Routine examination</p>
+          <p>Routine examination and consultation</p>
           <div class="cost">$75-$150</div>
         </div>
 
         <div class="procedure-card" onclick="selectProcedure('emergency')">
           <h4>Emergency</h4>
-          <p>Urgent care visit</p>
+          <p>Urgent medical care visit</p>
           <div class="cost">$300-$600</div>
         </div>
 
         <div class="procedure-card" onclick="selectProcedure('nasal_procedure')">
           <h4>Nose Mask Treatment</h4>
-          <p>Nasal procedure/care</p>
+          <p>Nasal procedure and respiratory care</p>
           <div class="cost">$150-$350</div>
         </div>
 
@@ -215,13 +337,13 @@
 
         <div class="procedure-card" onclick="selectProcedure('blood_test')">
           <h4>Blood Test</h4>
-          <p>Laboratory analysis</p>
+          <p>Laboratory analysis and diagnostics</p>
           <div class="cost">$30-$80</div>
         </div>
 
         <div class="procedure-card" onclick="selectProcedure('xray')">
           <h4>X-Ray</h4>
-          <p>Radiology imaging</p>
+          <p>Radiology imaging services</p>
           <div class="cost">$100-$250</div>
         </div>
       </div>
@@ -231,71 +353,115 @@
 
     <!-- Results Section -->
     <div class="results-section" id="resultsSection">
-      <h2>Generated Claim</h2>
+      <h2>Generated Insurance Claim</h2>
       <div class="claim-preview" id="claimPreview"></div>
       <button class="submit-btn" onclick="saveClaim()">Save Claim to Database</button>
     </div>
   </div>
 
   <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyBVQ9mcfEIJDShsN7G2zwQw9fmu9LJZmIg",
-      authDomain: "claim-demo-77679.firebaseapp.com",
-      projectId: "claim-demo-77679",
-      storageBucket: "claim-demo-77679.firebasestorage.app",
-      messagingSenderId: "56576633137",
-      appId: "1:56576633137:web:d44014e28fce7e6694e810",
-      measurementId: "G-4F91N7JNEW"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const analytics = firebase.analytics();
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
+    // Global variables
     let currentUser = null;
     let selectedProcedure = 'clinic_visit';
+    let currentClaimData = null;
 
-    // Firebase Auth State Listener
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('userName').textContent = user.displayName || user.email;
-        document.getElementById('userInfo').style.display = 'block';
-        document.getElementById('signOutBtn').style.display = 'inline-block';
-        document.getElementById('medicalForm').style.display = 'block';
-        document.getElementById('authSection').style.display = 'none';
+    // Wait for Firebase to be loaded
+    setTimeout(() => {
+      if (window.firebase) {
+        initializeAuth();
       } else {
-        currentUser = null;
-        document.getElementById('medicalForm').style.display = 'none';
-        document.getElementById('resultsSection').style.display = 'none';
-        document.getElementById('authSection').style.display = 'block';
+        console.error('Firebase not loaded');
+        document.getElementById('authSection').innerHTML = 
+          '<p style="color: red;">Error loading Firebase. Please refresh the page.</p>';
       }
-    });
+    }, 1000);
 
-    // Auth Functions
-    function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log('Signed in successfully');
-        })
-        .catch((error) => {
-          console.error('Sign in error:', error);
-          alert('Sign in failed. Please try again.');
-        });
+    function initializeAuth() {
+      const { auth, onAuthStateChanged } = window.firebase;
+      
+      // Auth state listener
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          showUserInfo(user);
+          showMedicalForm();
+        } else {
+          currentUser = null;
+          hideMedicalForm();
+          hideResults();
+          showAuthSection();
+        }
+      });
     }
 
-    function signOut() {
-      auth.signOut()
-        .then(() => {
-          console.log('Signed out successfully');
-        })
-        .catch((error) => {
-          console.error('Sign out error:', error);
-        });
+    function showUserInfo(user) {
+      document.getElementById('userName').textContent = user.displayName || 'User';
+      document.getElementById('userEmail').textContent = user.email;
+      document.getElementById('userInfo').style.display = 'block';
+      document.getElementById('signOutBtn').style.display = 'inline-block';
+    }
+
+    function showAuthSection() {
+      document.getElementById('authSection').style.display = 'block';
+      document.getElementById('medicalForm').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'none';
+    }
+
+    function showMedicalForm() {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('medicalForm').style.display = 'block';
+      document.getElementById('resultsSection').style.display = 'none';
+    }
+
+    function showResults() {
+      document.getElementById('resultsSection').style.display = 'block';
+    }
+
+    function hideMedicalForm() {
+      document.getElementById('medicalForm').style.display = 'none';
+    }
+
+    function hideResults() {
+      document.getElementById('resultsSection').style.display = 'none';
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Auth Functions
+    async function signIn() {
+      const { auth, signInWithPopup, provider } = window.firebase;
+      
+      try {
+        showLoading();
+        const result = await signInWithPopup(auth, provider);
+        console.log('Signed in successfully:', result.user);
+      } catch (error) {
+        console.error('Sign in error:', error);
+        alert('Sign in failed: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function signOut() {
+      const { auth, signOut } = window.firebase;
+      
+      try {
+        showLoading();
+        await signOut(auth);
+        console.log('Signed out successfully');
+      } catch (error) {
+        console.error('Sign out error:', error);
+        alert('Sign out failed: ' + error.message);
+      } finally {
+        hideLoading();
+      }
     }
 
     // Procedure Selection
@@ -319,8 +485,9 @@
         return;
       }
 
-      // Send data to backend
       try {
+        showLoading();
+        
         const response = await fetch('/submit_text', {
           method: 'POST',
           headers: {
@@ -335,18 +502,25 @@
           })
         });
 
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
         const data = await response.json();
+        currentClaimData = data;
         
         // Display results
         document.getElementById('claimPreview').textContent = data.claim_text;
-        document.getElementById('resultsSection').style.display = 'block';
+        showResults();
         
         // Scroll to results
         document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         
       } catch (error) {
         console.error('Error generating claim:', error);
-        alert('Error generating claim. Please try again.');
+        alert('Error generating claim: ' + error.message);
+      } finally {
+        hideLoading();
       }
     }
 
@@ -357,26 +531,42 @@
         return;
       }
 
+      if (!currentClaimData) {
+        alert('No claim data to save');
+        return;
+      }
+
+      const { db, collection, addDoc, serverTimestamp } = window.firebase;
+
       const claimData = {
         patientName: document.getElementById('patientName').value,
         symptoms: document.getElementById('symptoms').value,
         procedure: selectedProcedure,
-        claimText: document.getElementById('claimPreview').textContent,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: currentUser.uid
+        claimText: currentClaimData.claim_text,
+        icdCode: currentClaimData.icd.icd_code,
+        icdDisplay: currentClaimData.icd.icd_display,
+        cptCode: currentClaimData.cpt.code,
+        timestamp: serverTimestamp(),
+        userId: currentUser.uid,
+        userEmail: currentUser.email
       };
 
       try {
-        await db.collection('claims').add(claimData);
-        alert('Claim saved successfully!');
+        showLoading();
+        const docRef = await addDoc(collection(db, 'claims'), claimData);
+        alert('Claim saved successfully with ID: ' + docRef.id);
       } catch (error) {
         console.error('Error saving claim:', error);
-        alert('Error saving claim. Please try again.');
+        alert('Error saving claim: ' + error.message);
+      } finally {
+        hideLoading();
       }
     }
 
-    // Initialize procedure selection
-    document.querySelector('.procedure-card').classList.add('selected');
+    // Initialize first procedure as selected
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector('.procedure-card').classList.add('selected');
+    });
   </script>
 </body>
-</html>
+          </html>
