@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Billing - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .links {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .loading {
+            display: none;
+            color: #667eea;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">🏥</div>
+            <h1>Medical Billing System</h1>
+            <p class="subtitle">Professional Clinic Management</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="clinicId">Clinic ID</label>
+                    <input type="text" id="clinicId" placeholder="Enter your Clinic ID" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="staffId">Staff ID</label>
+                    <input type="text" id="staffId" placeholder="Enter your Staff ID" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    Login to Clinic
+                </button>
+                <div id="loading" class="loading">Logging in...</div>
+                <div id="loginError" class="error"></div>
+            </form>
+            
+            <div class="links">
+                <a href="create-clinic.html" class="btn btn-secondary">Create New Clinic</a>
+                <a href="join-clinic.html" class="link">Join Existing Clinic</a>
+                <a href="#" class="link">Forgot Staff ID?</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG - UPDATE WITH YOUR APPS SCRIPT URL
+        const API_BASE = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with your web app URL
+
+        // Check if user is already logged in
+        function checkExistingSession() {
+            const currentUser = localStorage.getItem('currentUser');
+            const currentClinic = localStorage.getItem('currentClinic');
+            
+            if (currentUser && currentClinic) {
+                redirectToDashboard(JSON.parse(currentUser));
+            }
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const clinicId = document.getElementById('clinicId').value.trim().toUpperCase();
+            const staffId = document.getElementById('staffId').value.trim().toUpperCase();
+            
+            if (!clinicId || !staffId) {
+                showError('Please enter both Clinic ID and Staff ID');
+                return;
+            }
+            
+            await loginUser(clinicId, staffId);
+        });
+
+        async function loginUser(clinicId, staffId) {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}?action=loginUser&clinicId=${clinicId}&staffId=${staffId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Save user session
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    localStorage.setItem('currentClinic', JSON.stringify(data.clinic));
+                    
+                    redirectToDashboard(data.user);
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function redirectToDashboard(user) {
+            if (user.role === 'Admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else {
+                window.location.href = 'staff-dashboard.html';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showLoading(show) {
+            const loginBtn = document.getElementById('loginBtn');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (show) {
+                loginBtn.style.display = 'none';
+                loadingDiv.style.display = 'block';
+            } else {
+                loginBtn.style.display = 'block';
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        // Check for existing session on page load
+        checkExistingSession();
+    </script>
+</body>
+</html>
