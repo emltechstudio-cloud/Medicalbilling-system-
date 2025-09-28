@@ -1,700 +1,913 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Billing - P2P Clinic System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Billing System - Multi-Clinic P2P</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+    }
 
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            padding: 30px 0;
-        }
+    /* Clinic Setup Styles */
+    .setup-section {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
 
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
+    .setup-options {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 30px 0;
+    }
 
-        /* Clinic Setup Section */
-        .setup-section {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: center;
-        }
+    .setup-option {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
 
-        .setup-options {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin: 30px 0;
-        }
+    .setup-option:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
 
-        .setup-option {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
+    .clinic-form {
+      margin-top: 15px;
+    }
 
-        .setup-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
 
-        .setup-option h3 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
 
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
+    .submit-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 10px;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
+    /* Clinic Dashboard Styles */
+    .clinic-dashboard {
+      display: none;
+    }
 
-        .submit-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            width: 100%;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+    .clinic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+    }
 
-        /* Main Application */
-        .app-section {
-            display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
+    .clinic-info h2 {
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
 
-        .clinic-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-        }
+    .clinic-details {
+      color: #666;
+      font-size: 14px;
+    }
 
-        .clinic-info h2 {
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
 
-        .clinic-details {
-            color: #666;
-            font-size: 14px;
-        }
+    .clinic-sidebar {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+    }
 
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
+    .online-staff {
+      margin-bottom: 20px;
+    }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #e74c3c;
-        }
+    .staff-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
 
-        .status-dot.connected {
-            background: #2ecc71;
-        }
+    .staff-item {
+      padding: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
 
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    .clinic-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-        /* Dashboard */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
-        }
+    .clinic-btn {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
 
-        .sidebar {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-        }
+    .medical-billing-ui {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      min-height: 500px;
+    }
 
-        .online-staff {
-            margin-bottom: 20px;
-        }
+    /* Medical Billing Styles */
+    .screen {
+      display: none;
+    }
 
-        .staff-list {
-            max-height: 150px;
-            overflow-y: auto;
-        }
+    .screen.active {
+      display: block;
+    }
 
-        .staff-item {
-            padding: 8px;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 14px;
-        }
+    .option-card {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      margin-bottom: 15px;
+    }
 
-        .claims-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
+    .option-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+      border-color: #667eea;
+    }
 
-        .claim-item {
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
+    .option-card .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
 
-        .claim-meta {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
 
-        /* Medical Form */
-        .medical-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-        }
+    .medical-claims-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
 
-        .procedure-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
+    .medical-claim-item {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .procedure-card {
-            border: 2px solid #e0e0e0;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            background: white;
-        }
+    .notes-options {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
 
-        .procedure-card.selected {
-            border-color: #667eea;
-            background: #e8f0fe;
-        }
+    .notes-tab {
+      flex: 1;
+      padding: 12px;
+      background: #e9ecef;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-        /* Messages */
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
-        }
+    .notes-tab.active {
+      background: #667eea;
+      color: white;
+    }
 
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+    .hidden {
+      display: none !important;
+    }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+    .metadata-summary {
+      background: #e3f2fd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
 
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-    </style>
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      width: 40px;
+      height: 40px;
+      margin-bottom: 20px;
+    }
+
+    .claim-output {
+      background: #f8f9fa;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 200px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      width: 100%;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .action-buttons .btn {
+      flex: 1;
+      margin-top: 0;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Medical Billing - P2P Clinic System</h1>
-            <p>Browser-to-Browser Real-Time Collaboration</p>
+  <div class="container">
+    <!-- Clinic Setup Screen -->
+    <div id="setupScreen">
+      <div class="header">
+        <h1>Medical Billing System</h1>
+        <p>Multi-Clinic P2P Platform</p>
+      </div>
+      
+      <div class="setup-section">
+        <h2>Setup Your Clinic</h2>
+        
+        <div class="setup-options">
+          <div class="setup-option" onclick="showForm('create')">
+            <h3>🏥 Create New Clinic</h3>
+            <p>Start a new medical practice</p>
+            <div id="createClinicForm" class="clinic-form" style="display: none;">
+              <div class="form-group">
+                <label>Clinic Name</label>
+                <input type="text" id="clinicName" placeholder="City General Hospital">
+              </div>
+              <div class="form-group">
+                <label>Your Name (Administrator)</label>
+                <input type="text" id="adminName" placeholder="Dr. John Smith">
+              </div>
+              <button class="submit-btn" onclick="createClinic()">Create Clinic</button>
+            </div>
+          </div>
+          
+          <div class="setup-option" onclick="showForm('join')">
+            <h3>👥 Join Existing Clinic</h3>
+            <p>Join using Clinic ID</p>
+            <div id="joinClinicForm" class="clinic-form" style="display: none;">
+              <div class="form-group">
+                <label>Clinic ID</label>
+                <input type="text" id="joinClinicId" placeholder="CLINIC-XXXXXXX">
+              </div>
+              <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="staffName" placeholder="Your full name">
+              </div>
+              <button class="submit-btn" onclick="joinClinic()">Join Clinic</button>
+            </div>
+          </div>
         </div>
-
-        <!-- Clinic Setup Section -->
-        <div class="setup-section" id="setupSection">
-            <h2>Setup Your Clinic</h2>
-            <p>Choose how you want to connect your clinic</p>
-
-            <div class="setup-options">
-                <!-- Create New Clinic -->
-                <div class="setup-option" onclick="showCreateClinicForm()">
-                    <h3>🏥 Create New Clinic</h3>
-                    <p>Start a new clinic and become the admin</p>
-                    <div class="clinic-form" id="createClinicForm" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Clinic Name:</label>
-                            <input type="text" id="newClinicName" placeholder="City General Hospital">
-                        </div>
-                        <div class="form-group">
-                            <label>Your Name (Admin):</label>
-                            <input type="text" id="adminName" placeholder="Dr. John Smith">
-                        </div>
-                        <button class="submit-btn" onclick="createNewClinic()">Create Clinic</button>
-                    </div>
-                </div>
-
-                <!-- Join Existing Clinic -->
-                <div class="setup-option" onclick="showJoinClinicForm()">
-                    <h3>👥 Join Existing Clinic</h3>
-                    <p>Join a clinic using Clinic ID</p>
-                    <div class="clinic-form" id="joinClinicForm" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Clinic ID:</label>
-                            <input type="text" id="joinClinicId" placeholder="Enter Clinic ID">
-                        </div>
-                        <div class="form-group">
-                            <label>Your Name:</label>
-                            <input type="text" id="staffName" placeholder="Your full name">
-                        </div>
-                        <button class="submit-btn" onclick="joinExistingClinic()">Join Clinic</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="message info" id="setupMessage">
-                💡 <strong>How it works:</strong> All data stays in your browser and syncs directly with other clinic members. No server storage!
-            </div>
-        </div>
-
-        <!-- Main Application -->
-        <div class="app-section" id="appSection">
-            <div class="clinic-header">
-                <div class="clinic-info">
-                    <h2 id="clinicName">Clinic Name</h2>
-                    <div class="clinic-details">
-                        Clinic ID: <strong id="clinicIdDisplay">Loading...</strong> • 
-                        Role: <strong id="userRole">Staff</strong> •
-                        <span class="connection-status">
-                            <span class="status-dot" id="statusDot"></span>
-                            <span id="connectionStatus">Connecting...</span>
-                        </span>
-                    </div>
-                </div>
-                <button class="logout-btn" onclick="logout()">Leave Clinic</button>
-            </div>
-
-            <div class="dashboard">
-                <!-- Sidebar -->
-                <div class="sidebar">
-                    <div class="online-staff">
-                        <h4>👥 Online Staff (<span id="onlineCount">0</span>)</h4>
-                        <div class="staff-list" id="staffList">
-                            <!-- Online staff will appear here -->
-                        </div>
-                    </div>
-
-                    <div class="claims-section">
-                        <h4>📋 Recent Claims (<span id="claimsCount">0</span>)</h4>
-                        <div class="claims-list" id="claimsList">
-                            <!-- Claims will appear here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Main Content -->
-                <div class="main-content">
-                    <div class="medical-form">
-                        <h3>Generate New Insurance Claim</h3>
-                        
-                        <div class="form-group">
-                            <label>Patient Name:</label>
-                            <input type="text" id="patientName" placeholder="Patient full name">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Medical Condition/Symptoms:</label>
-                            <textarea id="symptoms" rows="3" placeholder="Describe patient condition"></textarea>
-                        </div>
-
-                        <h4>Select Procedure:</h4>
-                        <div class="procedure-options">
-                            <div class="procedure-card" onclick="selectProcedure('clinic_visit')">
-                                <h4>Clinic Visit</h4>
-                                <div class="cost">$75-$150</div>
-                            </div>
-                            <div class="procedure-card" onclick="selectProcedure('emergency')">
-                                <h4>Emergency</h4>
-                                <div class="cost">$300-$600</div>
-                            </div>
-                            <div class="procedure-card" onclick="selectProcedure('nasal_procedure')">
-                                <h4>Nose Treatment</h4>
-                                <div class="cost">$150-$350</div>
-                            </div>
-                        </div>
-
-                        <button class="submit-btn" onclick="generateClaim()">Generate Claim</button>
-                    </div>
-
-                    <div class="message info" id="syncMessage">
-                        🔄 <strong>Real-time Sync:</strong> Claims are automatically shared with all clinic members
-                    </div>
-                </div>
-            </div>
-
-            <div class="message success" id="successMessage"></div>
-            <div class="message error" id="errorMessage"></div>
-        </div>
+      </div>
     </div>
-
-    <script>
-        // P2P Data Management
-        let currentClinic = null;
-        let currentUser = null;
-        let selectedProcedure = 'clinic_visit';
-        let peerConnections = new Map();
-        let dataChannel = null;
-        let clinicData = {
-            staff: [],
-            claims: [],
-            clinicInfo: null
-        };
-
-        // Generate unique clinic ID
-        function generateClinicId() {
-            return 'CLINIC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        }
-
-        // Generate unique user ID
-        function generateUserId() {
-            return 'USER-' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // Show/hide forms
-        function showCreateClinicForm() {
-            document.getElementById('createClinicForm').style.display = 'block';
-            document.getElementById('joinClinicForm').style.display = 'none';
-        }
-
-        function showJoinClinicForm() {
-            document.getElementById('joinClinicForm').style.display = 'block';
-            document.getElementById('createClinicForm').style.display = 'none';
-        }
-
-        // Create new clinic
-        function createNewClinic() {
-            const clinicName = document.getElementById('newClinicName').value;
-            const adminName = document.getElementById('adminName').value;
-
-            if (!clinicName || !adminName) {
-                showError('Please fill all fields');
-                return;
-            }
-
-            const clinicId = generateClinicId();
-            const userId = generateUserId();
-
-            currentClinic = {
-                id: clinicId,
-                name: clinicName,
-                createdBy: userId
-            };
-
-            currentUser = {
-                id: userId,
-                name: adminName,
-                role: 'admin',
-                clinicId: clinicId
-            };
-
-            // Initialize clinic data
-            clinicData.clinicInfo = currentClinic;
-            clinicData.staff.push(currentUser);
-
-            // Store in localStorage for persistence
-            localStorage.setItem('currentClinic', JSON.stringify(currentClinic));
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem(`clinicData_${clinicId}`, JSON.stringify(clinicData));
-
-            initializeP2PNetwork();
-            showApplication();
-            showSuccess(`Clinic created! Your Clinic ID: ${clinicId} - Share this with your staff`);
-        }
-
-        // Join existing clinic
-        function joinExistingClinic() {
-            const clinicId = document.getElementById('joinClinicId').value;
-            const staffName = document.getElementById('staffName').value;
-
-            if (!clinicId || !staffName) {
-                showError('Please fill all fields');
-                return;
-            }
-
-            // Check if clinic data exists locally
-            const savedClinicData = localStorage.getItem(`clinicData_${clinicId}`);
-            if (!savedClinicData) {
-                showError('Clinic not found. Please check the Clinic ID or ask admin to share it.');
-                return;
-            }
-
-            currentClinic = JSON.parse(savedClinicData).clinicInfo;
-            const userId = generateUserId();
-
-            currentUser = {
-                id: userId,
-                name: staffName,
-                role: 'staff',
-                clinicId: clinicId
-            };
-
-            // Load existing clinic data
-            clinicData = JSON.parse(savedClinicData);
-            clinicData.staff.push(currentUser);
-
-            // Update storage
-            localStorage.setItem('currentClinic', JSON.stringify(currentClinic));
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem(`clinicData_${clinicId}`, JSON.stringify(clinicData));
-
-            initializeP2PNetwork();
-            showApplication();
-            showSuccess(`Joined clinic: ${currentClinic.name}`);
-        }
-
-        // Simple P2P simulation using localStorage as "signal channel"
-        function initializeP2PNetwork() {
-            updateConnectionStatus('connected');
+    
+    <!-- Clinic Dashboard -->
+    <div id="clinicDashboard" class="clinic-dashboard">
+      <div class="clinic-header">
+        <div class="clinic-info">
+          <h2 id="dashboardClinicName">Clinic Name</h2>
+          <div class="clinic-details">
+            Clinic ID: <strong id="dashboardClinicId">CLINIC-XXXXXXX</strong> • 
+            Role: <strong id="dashboardUserRole">Staff</strong>
+          </div>
+        </div>
+        <button class="clinic-btn" style="background: #e74c3c; color: white;" onclick="leaveClinic()">Leave Clinic</button>
+      </div>
+      
+      <div class="dashboard-content">
+        <!-- Clinic Sidebar -->
+        <div class="clinic-sidebar">
+          <div class="online-staff">
+            <h4>👥 Online Staff (<span id="onlineCount">0</span>)</h4>
+            <div class="staff-list" id="staffList"></div>
+          </div>
+          
+          <div class="clinic-actions">
+            <button class="clinic-btn" style="background: #667eea; color: white;" onclick="showMedicalBilling()">
+              📋 Medical Billing
+            </button>
+            <button class="clinic-btn" style="background: #28a745; color: white;" onclick="exportClinicData()">
+              📊 Export Data
+            </button>
+          </div>
+        </div>
+        
+        <!-- Medical Billing Interface -->
+        <div class="medical-billing-ui">
+          <button class="back-btn" id="medicalBackBtn" onclick="showClinicDashboard()" style="display: none;">←</button>
+          
+          <!-- HOME SCREEN -->
+          <div id="homeScreen" class="screen active">
+            <div class="option-card" onclick="showMedicalScreen('claimsScreen')">
+              <div class="icon">📋</div>
+              <h3>View Claims</h3>
+              <p>Review and manage saved medical claims</p>
+            </div>
             
-            // Simulate real-time updates by watching localStorage changes
-            setInterval(() => {
-                syncClinicData();
-            }, 2000);
+            <div class="option-card" onclick="showMedicalScreen('newClaimScreen')">
+              <div class="icon">➕</div>
+              <h3>Generate New Claim</h3>
+              <p>Create a new medical billing claim</p>
+            </div>
+          </div>
 
-            // Load initial data
-            syncClinicData();
-        }
+          <!-- CLAIMS HISTORY SCREEN -->
+          <div id="claimsScreen" class="screen">
+            <div class="card">
+              <h2 style="margin-bottom: 20px;">Saved Claims</h2>
+              <div class="medical-claims-list" id="medicalClaimsList"></div>
+              <div id="noClaimsMessage" style="color: #666; padding: 20px; text-align: center;">
+                No saved claims yet. Generate your first claim!
+              </div>
+            </div>
+          </div>
 
-        // Sync data across browsers using localStorage as communication channel
-        function syncClinicData() {
-            if (!currentClinic) return;
-
-            const clinicId = currentClinic.id;
-            const sharedDataKey = `clinicSync_${clinicId}`;
-            
-            // Read latest data from "network"
-            const latestData = localStorage.getItem(sharedDataKey);
-            if (latestData) {
-                const parsedData = JSON.parse(latestData);
-                if (parsedData.timestamp > (clinicData.timestamp || 0)) {
-                    clinicData = parsedData;
-                    updateUI();
-                }
-            }
-
-            // Broadcast our current data
-            clinicData.timestamp = Date.now();
-            localStorage.setItem(sharedDataKey, JSON.stringify(clinicData));
-        }
-
-        // Generate new claim
-        function generateClaim() {
-            const patientName = document.getElementById('patientName').value;
-            const symptoms = document.getElementById('symptoms').value;
-
-            if (!patientName || !symptoms) {
-                showError('Please fill all fields');
-                return;
-            }
-
-            const claimId = 'CLM-' + Date.now();
-            const newClaim = {
-                id: claimId,
-                patientName: patientName,
-                symptoms: symptoms,
-                procedure: selectedProcedure,
-                createdBy: currentUser.name,
-                timestamp: new Date().toISOString(),
-                status: 'Generated',
-                clinicId: currentClinic.id
-            };
-
-            clinicData.claims.unshift(newClaim);
-            syncClinicData();
-
-            // Clear form
-            document.getElementById('patientName').value = '';
-            document.getElementById('symptoms').value = '';
-
-            showSuccess(`Claim generated: ${patientName}`);
-        }
-
-        // Update UI with latest data
-        function updateUI() {
-            // Update clinic info
-            document.getElementById('clinicName').textContent = clinicData.clinicInfo.name;
-            document.getElementById('clinicIdDisplay').textContent = clinicData.clinicInfo.id;
-            document.getElementById('userRole').textContent = currentUser.role;
-
-            // Update online staff
-            const staffList = document.getElementById('staffList');
-            const onlineCount = document.getElementById('onlineCount');
-            staffList.innerHTML = '';
-            
-            clinicData.staff.forEach(staff => {
-                const staffItem = document.createElement('div');
-                staffItem.className = 'staff-item';
-                staffItem.innerHTML = `👤 ${staff.name} <small>(${staff.role})</small>`;
-                staffList.appendChild(staffItem);
-            });
-            onlineCount.textContent = clinicData.staff.length;
-
-            // Update claims list
-            const claimsList = document.getElementById('claimsList');
-            const claimsCount = document.getElementById('claimsCount');
-            claimsList.innerHTML = '';
-            
-            clinicData.claims.forEach(claim => {
-                const claimItem = document.createElement('div');
-                claimItem.className = 'claim-item';
-                claimItem.innerHTML = `
-                    <strong>${claim.patientName}</strong>
-                    <div class="claim-meta">
-                        ${claim.procedure} • ${claim.status}<br>
-                        By: ${claim.createdBy}<br>
-                        ${new Date(claim.timestamp).toLocaleDateString()}
-                    </div>
-                `;
-                claimsList.appendChild(claimItem);
-            });
-            claimsCount.textContent = clinicData.claims.length;
-        }
-
-        // Update connection status
-        function updateConnectionStatus(status) {
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('connectionStatus');
-            
-            if (status === 'connected') {
-                statusDot.className = 'status-dot connected';
-                statusText.textContent = 'Connected to Clinic';
-            } else {
-                statusDot.className = 'status-dot';
-                statusText.textContent = 'Disconnected';
-            }
-        }
-
-        // Show application
-        function showApplication() {
-            document.getElementById('setupSection').style.display = 'none';
-            document.getElementById('appSection').style.display = 'block';
-            updateUI();
-        }
-
-        // Logout
-        function logout() {
-            currentClinic = null;
-            currentUser = null;
-            clinicData = { staff: [], claims: [], clinicInfo: null };
-            
-            localStorage.removeItem('currentClinic');
-            localStorage.removeItem('currentUser');
-            
-            document.getElementById('appSection').style.display = 'none';
-            document.getElementById('setupSection').style.display = 'block';
-        }
-
-        // Procedure selection
-        function selectProcedure(procedure) {
-            selectedProcedure = procedure;
-            document.querySelectorAll('.procedure-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-        }
-
-        // Message functions
-        function showSuccess(message) {
-            const el = document.getElementById('successMessage');
-            el.textContent = message;
-            el.className = 'message success';
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
-        }
-
-        function showError(message) {
-            const el = document.getElementById('errorMessage');
-            el.textContent = message;
-            el.className = 'message error';
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
-        }
-
-        // Check for existing session on load
-        window.addEventListener('load', function() {
-            const savedClinic = localStorage.getItem('currentClinic');
-            const savedUser = localStorage.getItem('currentUser');
-            
-            if (savedClinic && savedUser) {
-                currentClinic = JSON.parse(savedClinic);
-                currentUser = JSON.parse(savedUser);
-                clinicData = JSON.parse(localStorage.getItem(`clinicData_${currentClinic.id}`)) || clinicData;
+          <!-- NEW CLAIM FORM SCREEN -->
+          <div id="newClaimScreen" class="screen">
+            <div class="card">
+              <h2 style="margin-bottom: 20px;">Patient Information</h2>
+              
+              <form id="patientForm">
+                <div class="form-group">
+                  <label>Patient Name *</label>
+                  <input type="text" id="patientName" required>
+                </div>
                 
-                initializeP2PNetwork();
-                showApplication();
-            }
+                <div class="form-group">
+                  <label>Age *</label>
+                  <input type="number" id="age" required>
+                </div>
+                
+                <div class="form-group">
+                  <label>Sex *</label>
+                  <select id="sex" required>
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label>Insurance Provider *</label>
+                  <input type="text" id="insuranceProvider" required>
+                </div>
+                
+                <div class="form-group">
+                  <label>Policy Number *</label>
+                  <input type="text" id="policyNumber" required>
+                </div>
+                
+                <div class="form-group">
+                  <label>Encounter Type *</label>
+                  <select id="encounterType" required>
+                    <option value="">Select encounter type...</option>
+                    <option value="office-visit">Office Visit</option>
+                    <option value="nurse-office">Nurse's Office</option>
+                    <option value="x-ray">X-Ray</option>
+                    <option value="laboratory">Laboratory</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="emergency">Emergency Visit</option>
+                    <option value="follow-up">Follow-up</option>
+                    <option value="physical-exam">Physical Examination</option>
+                    <option value="procedure">Medical Procedure</option>
+                    <option value="telehealth">Telehealth</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label>Healthcare Provider *</label>
+                  <input type="text" id="healthcareProvider" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Continue to Medical Notes</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- MEDICAL NOTES SCREEN -->
+          <div id="notesScreen" class="screen">
+            <div class="card">
+              <h2 style="margin-bottom: 20px;">Medical Notes</h2>
+              
+              <div class="metadata-summary" id="patientSummary"></div>
+              
+              <div class="notes-options">
+                <button class="notes-tab active" onclick="switchNotesMode('type')">✍️ Type Notes</button>
+                <button class="notes-tab" onclick="switchNotesMode('record')">🎤 Record Audio</button>
+              </div>
+              
+              <div id="typeNotesMode">
+                <div class="form-group">
+                  <label>Medical History / Notes</label>
+                  <textarea id="medicalNotes" rows="8" placeholder="Enter symptoms, diagnosis, treatment notes..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="showReviewScreen()">Review & Generate Claim</button>
+              </div>
+              
+              <div id="recordNotesMode" class="hidden">
+                <div class="form-group">
+                  <label>Transcribed Notes</label>
+                  <textarea id="transcribedNotes" rows="8" placeholder="Paste transcribed notes here..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="showReviewScreen()">Review & Generate Claim</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- REVIEW & GENERATE SCREEN -->
+          <div id="reviewScreen" class="screen">
+            <div class="card">
+              <h2 style="margin-bottom: 20px;">Review Information</h2>
+              
+              <div id="fullPatientSummary" class="metadata-summary"></div>
+              
+              <div class="form-group">
+                <label>Medical Notes (Editable)</label>
+                <textarea id="finalNotes" rows="6"></textarea>
+              </div>
+              
+              <button class="btn btn-success" onclick="generateFinalClaim()">Generate Claim</button>
+            </div>
+            
+            <div class="card hidden" id="generatedClaimCard">
+              <h2 style="margin-bottom: 15px;">Generated Medical Claim</h2>
+              <textarea class="claim-output" id="claimOutput"></textarea>
+              <div class="action-buttons">
+                <button class="btn btn-success" onclick="saveClaim()">Save</button>
+                <button class="btn btn-primary" onclick="shareClaim()">Share</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Clinic Management System
+    let currentClinic = null;
+    let currentUser = null;
+    let clinicData = {
+      staff: [],
+      claims: [],
+      clinicInfo: null
+    };
+
+    // Medical Billing System
+    const API_BASE = "https://emmanuel154-medical-billing-system24-7.hf.space";
+    let currentPatientData = {};
+    let currentMedicalScreen = 'homeScreen';
+    let medicalScreenStack = [];
+
+    // Initialize application
+    function initApp() {
+      const savedClinic = localStorage.getItem('currentClinic');
+      const savedUser = localStorage.getItem('currentUser');
+      
+      if (savedClinic && savedUser) {
+        currentClinic = JSON.parse(savedClinic);
+        currentUser = JSON.parse(savedUser);
+        
+        const savedData = localStorage.getItem(`clinicData_${currentClinic.id}`);
+        if (savedData) clinicData = JSON.parse(savedData);
+        
+        showClinicDashboard();
+        startSync();
+      }
+      
+      loadMedicalClaims();
+    }
+
+    // Clinic Setup Functions
+    function showForm(type) {
+      document.getElementById('createClinicForm').style.display = type === 'create' ? 'block' : 'none';
+      document.getElementById('joinClinicForm').style.display = type === 'join' ? 'block' : 'none';
+    }
+
+    function createClinic() {
+      const clinicName = document.getElementById('clinicName').value;
+      const adminName = document.getElementById('adminName').value;
+      
+      if (!clinicName || !adminName) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      const clinicId = 'CLINIC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      const userId = 'USER-' + Math.random().toString(36).substr(2, 9);
+      
+      currentClinic = { id: clinicId, name: clinicName };
+      currentUser = { id: userId, name: adminName, role: 'admin', clinicId: clinicId };
+      
+      clinicData.clinicInfo = currentClinic;
+      clinicData.staff.push(currentUser);
+      
+      localStorage.setItem('currentClinic', JSON.stringify(currentClinic));
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      localStorage.setItem(`clinicData_${clinicId}`, JSON.stringify(clinicData));
+      
+      showClinicDashboard();
+      startSync();
+      alert(`Clinic created! Your Clinic ID: ${clinicId}`);
+    }
+
+    function joinClinic() {
+      const clinicId = document.getElementById('joinClinicId').value.toUpperCase();
+      const staffName = document.getElementById('staffName').value;
+      
+      if (!clinicId || !staffName) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      const savedData = localStorage.getItem(`clinicData_${clinicId}`);
+      if (!savedData) {
+        alert('Clinic not found. Please check the Clinic ID.');
+        return;
+      }
+      
+      clinicData = JSON.parse(savedData);
+      currentClinic = clinicData.clinicInfo;
+      
+      const userId = 'USER-' + Math.random().toString(36).substr(2, 9);
+      currentUser = { id: userId, name: staffName, role: 'staff', clinicId: clinicId };
+      
+      clinicData.staff.push(currentUser);
+      localStorage.setItem('currentClinic', JSON.stringify(currentClinic));
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      localStorage.setItem(`clinicData_${clinicId}`, JSON.stringify(clinicData));
+      
+      showClinicDashboard();
+      startSync();
+      alert(`Joined clinic: ${currentClinic.name}`);
+    }
+
+    function showClinicDashboard() {
+      document.getElementById('setupScreen').style.display = 'none';
+      document.getElementById('clinicDashboard').style.display = 'block';
+      
+      document.getElementById('dashboardClinicName').textContent = currentClinic.name;
+      document.getElementById('dashboardClinicId').textContent = currentClinic.id;
+      document.getElementById('dashboardUserRole').textContent = currentUser.role;
+      
+      updateClinicUI();
+      showMedicalScreen('homeScreen');
+    }
+
+    function updateClinicUI() {
+      const staffList = document.getElementById('staffList');
+      staffList.innerHTML = '';
+      
+      clinicData.staff.forEach(staff => {
+        const staffItem = document.createElement('div');
+        staffItem.className = 'staff-item';
+        staffItem.innerHTML = `👤 ${staff.name} <small>(${staff.role})</small>`;
+        staffList.appendChild(staffItem);
+      });
+      
+      document.getElementById('onlineCount').textContent = clinicData.staff.length;
+    }
+
+    function startSync() {
+      setInterval(syncClinicData, 3000);
+    }
+
+    function syncClinicData() {
+      if (!currentClinic) return;
+      
+      const syncKey = `clinicSync_${currentClinic.id}`;
+      const latestData = localStorage.getItem(syncKey);
+      
+      if (latestData) {
+        const parsedData = JSON.parse(latestData);
+        if (parsedData.timestamp > (clinicData.timestamp || 0)) {
+          clinicData = parsedData;
+          updateClinicUI();
+        }
+      }
+      
+      clinicData.timestamp = Date.now();
+      localStorage.setItem(syncKey, JSON.stringify(clinicData));
+    }
+
+    function leaveClinic() {
+      if (confirm('Are you sure you want to leave this clinic?')) {
+        clinicData.staff = clinicData.staff.filter(staff => staff.id !== currentUser.id);
+        localStorage.setItem(`clinicData_${currentClinic.id}`, JSON.stringify(clinicData));
+        
+        localStorage.removeItem('currentClinic');
+        localStorage.removeItem('currentUser');
+        
+        currentClinic = null;
+        currentUser = null;
+        clinicData = { staff: [], claims: [], clinicInfo: null };
+        
+        document.getElementById('clinicDashboard').style.display = 'none';
+        document.getElementById('setupScreen').style.display = 'block';
+      }
+    }
+
+    function exportClinicData() {
+      const dataStr = JSON.stringify(clinicData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${currentClinic.name}_data.json`;
+      link.click();
+    }
+
+    // Medical Billing Functions
+    function showMedicalBilling() {
+      document.getElementById('medicalBackBtn').style.display = 'block';
+      showMedicalScreen('homeScreen');
+    }
+
+    function showMedicalScreen(screenId) {
+      document.querySelectorAll('.medical-billing-ui .screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      currentMedicalScreen = screenId;
+    }
+
+    function showClinicDashboard() {
+      document.getElementById('medicalBackBtn').style.display = 'none';
+      showMedicalScreen('homeScreen');
+    }
+
+    // Handle patient form submission
+    document.getElementById('patientForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      currentPatientData = {
+        patient_name: document.getElementById('patientName').value,
+        age: parseInt(document.getElementById('age').value),
+        sex: document.getElementById('sex').value,
+        insurance_provider: document.getElementById('insuranceProvider').value,
+        policy_number: document.getElementById('policyNumber').value,
+        encounter_type: document.getElementById('encounterType').value,
+        healthcare_provider: document.getElementById('healthcareProvider').value
+      };
+      
+      document.getElementById('patientSummary').innerHTML = `
+        <h4>Patient Summary:</h4>
+        <div>Name: ${currentPatientData.patient_name}</div>
+        <div>Age: ${currentPatientData.age}</div>
+        <div>Insurance: ${currentPatientData.insurance_provider}</div>
+      `;
+      
+      showMedicalScreen('notesScreen');
+    });
+
+    function switchNotesMode(mode) {
+      document.getElementById('typeNotesMode').classList.toggle('hidden', mode !== 'type');
+      document.getElementById('recordNotesMode').classList.toggle('hidden', mode !== 'record');
+    }
+
+    function showReviewScreen() {
+      const medicalNotes = document.getElementById('medicalNotes').value || 
+                          document.getElementById('transcribedNotes').value;
+      
+      if (!medicalNotes.trim()) {
+        alert('Please enter medical notes before continuing');
+        return;
+      }
+      
+      currentPatientData.medical_history = medicalNotes;
+      
+      document.getElementById('fullPatientSummary').innerHTML = `
+        <h4>Complete Patient Information:</h4>
+        <div>Name: ${currentPatientData.patient_name}</div>
+        <div>Age: ${currentPatientData.age}</div>
+        <div>Sex: ${currentPatientData.sex}</div>
+        <div>Insurance: ${currentPatientData.insurance_provider}</div>
+        <div>Policy: ${currentPatientData.policy_number}</div>
+        <div>Encounter: ${currentPatientData.encounter_type}</div>
+      `;
+      
+      document.getElementById('finalNotes').value = medicalNotes;
+      showMedicalScreen('reviewScreen');
+    }
+
+    async function generateFinalClaim() {
+      currentPatientData.medical_history = document.getElementById('finalNotes').value;
+      
+      const payload = {
+        metadata: currentPatientData,
+        text: currentPatientData.medical_history
+      };
+      
+      try {
+        const response = await fetch(`${API_BASE}/submit_text`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-    </script>
+        
+        const data = await response.json();
+        
+        if (data.claim_text) {
+          document.getElementById('claimOutput').value = data.claim_text;
+          document.getElementById('generatedClaimCard').classList.remove('hidden');
+        } else {
+          throw new Error('Claim generation failed');
+        }
+      } catch (error) {
+        alert('Error generating claim: ' + error.message);
+      }
+    }
+
+    function saveClaim() {
+      const claimText = document.getElementById('claimOutput').value;
+      const fileName = `Claim_${currentPatientData.patient_name}_${Date.now()}.txt`;
+      
+      // Save to medical claims
+      const savedClaims = JSON.parse(localStorage.getItem('medicalClaims') || '[]');
+      const newClaim = {
+        id: Date.now(),
+        patientName: currentPatientData.patient_name,
+        date: new Date().toLocaleDateString(),
+        encounter: currentPatientData.encounter_type,
+        claimText: claimText
+      };
+      savedClaims.unshift(newClaim);
+      localStorage.setItem('medicalClaims', JSON.stringify(savedClaims));
+      
+      // Save to clinic shared data
+      if (currentClinic) {
+        const clinicClaim = {
+          id: newClaim.id,
+          patientName: currentPatientData.patient_name,
+          procedure: currentPatientData.encounter_type,
+          status: 'Generated',
+          createdBy: currentUser.name,
+          timestamp: new Date().toISOString()
+        };
+        
+        clinicData.claims.unshift(clinicClaim);
+        localStorage.setItem(`clinicData_${currentClinic.id}`, JSON.stringify(clinicData));
+      }
+      
+      // Download file
+      const blob = new Blob([claimText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      
+      alert('Claim saved successfully!');
+      loadMedicalClaims();
+      showMedicalScreen('claimsScreen');
+    }
+
+    function loadMedicalClaims() {
+      const savedClaims = JSON.parse(localStorage.getItem('medicalClaims') || '[]');
+      const claimsList = document.getElementById('medicalClaimsList');
+      const noClaimsMessage = document.getElementById('noClaimsMessage');
+      
+      if (savedClaims.length === 0) {
+        claimsList.style.display = 'none';
+        noClaimsMessage.style.display = 'block';
+      } else {
+        claimsList.style.display = 'block';
+        noClaimsMessage.style.display = 'none';
+        
+        claimsList.innerHTML = savedClaims.map(claim => `
+          <div class="medical-claim-item">
+            <div>
+              <h4>${claim.patientName}</h4>
+              <p>${claim.date} - ${claim.encounter}</p>
+            </div>
+            <div>
+              <button onclick="viewMedicalClaim(${claim.id})" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px; margin-right: 5px;">View</button>
+              <button onclick="deleteMedicalClaim(${claim.id})" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px;">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function viewMedicalClaim(claimId) {
+      const savedClaims = JSON.parse(localStorage.getItem('medicalClaims') || '[]');
+      const claim = savedClaims.find(c => c.id === claimId);
+      if (claim) {
+        alert(`Claim: ${claim.patientName}\n\n${claim.claimText}`);
+      }
+    }
+
+    function deleteMedicalClaim(claimId) {
+      if (confirm('Are you sure you want to delete this claim?')) {
+        const savedClaims = JSON.parse(localStorage.getItem('medicalClaims') || '[]');
+        const updatedClaims = savedClaims.filter(c => c.id !== claimId);
+        localStorage.setItem('medicalClaims', JSON.stringify(updatedClaims));
+        loadMedicalClaims();
+      }
+    }
+
+    function shareClaim() {
+      const claimText = document.getElementById('claimOutput').value;
+      navigator.clipboard.writeText(claimText).then(() => {
+        alert('Claim copied to clipboard!');
+      });
+    }
+
+    // Initialize the application
+    window.addEventListener('load', initApp);
+  </script>
 </body>
-  </html>
+</html>
